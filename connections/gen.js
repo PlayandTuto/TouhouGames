@@ -1,6 +1,6 @@
 // Deterministyczny generator dziennej łamigłówki
-const EPOCH = Date.UTC(2026, 10, 24); // #1 = 24.11.2026
- 
+const EPOCH = Date.UTC(2026, 10, 23); // #1 = 23.11.2026
+
 function mulberry32(a) {
   return function () {
     a |= 0; a = (a + 0x6D2B79F5) | 0;
@@ -17,11 +17,11 @@ function shuffle(arr, rnd) {
   }
   return a;
 }
+// Numer łamigłówki liczony w czasie UTC: nowa łamigłówka o 00:00 UTC dla wszystkich
 function dayNumber(date) {
-  const utc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
-  return Math.round((utc - EPOCH) / 86400000) + 1;
+  return Math.floor((date.getTime() - EPOCH) / 86400000) + 1;
 }
- 
+
 // Ile jest podziałów 16 postaci na 4 wybrane kategorie po 4 osoby?
 function countPartitions(chars, cats) {
   const fits = chars.map(c => cats.map(k => k.m.includes(c)));
@@ -36,7 +36,7 @@ function countPartitions(chars, cats) {
   })(0);
   return total;
 }
- 
+
 function generatePuzzle(n) {
   const rnd = mulberry32(n * 2654435761 + 12345);
   // każdy poziom ma własny cykl kategorii, więc kategorie nie powtarzają się co chwilę
@@ -71,8 +71,8 @@ function generatePuzzle(n) {
   }
   throw new Error("Nie udało się wygenerować łamigłówki " + n);
 }
- 
-// Data dla numeru łamigłówki (#1 = 23.11.2026)
+
+// Data (dzień kalendarzowy UTC) dla numeru łamigłówki (#1 = 23.11.2026)
 function dateOfDay(n) {
   const d = new Date(EPOCH + (n - 1) * 86400000);
   return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
@@ -80,7 +80,7 @@ function dateOfDay(n) {
 function dateKey(d) {
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 }
- 
+
 // Specjalna zagadka ustawiona ręcznie w special.js (jeśli jest i jest poprawna)
 function specialPuzzle(n) {
   if (typeof SPECIAL === "undefined") return null;
@@ -106,8 +106,7 @@ function specialPuzzle(n) {
     return null;
   }
 }
- 
+
 function getPuzzle(n) { return specialPuzzle(n) || generatePuzzle(n); }
- 
+
 if (typeof module !== "undefined") module.exports = { generatePuzzle, getPuzzle, countPartitions, dayNumber, dateOfDay, dateKey };
- 
