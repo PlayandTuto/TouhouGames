@@ -13,22 +13,32 @@ h1{font-size:20px;margin:0}.bar{display:flex;gap:6px}.m{color:var(--mut);font-si
 button,.btn{background:var(--ac);color:#fff;border:0;border-radius:6px;padding:8px 12px;font-size:15px;cursor:pointer;text-decoration:none;display:inline-block;align-self:flex-start}
 .ghost{background:transparent;color:var(--fg);border:1px solid var(--mut)}#dc{background:#5865F2}
 .intro{margin:18px 4px 12px}.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
-.card{background:var(--card);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;min-height:170px}
-.card h2{margin:0;font-size:18px}.card p{margin:0;flex:1}.ico{font-size:30px}
+.card{background:var(--card);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;height:250px;box-sizing:border-box;overflow:hidden;transition:transform .2s ease,box-shadow .2s ease}
+.card:not(.soon):hover{transform:translateY(-6px);box-shadow:0 10px 24px rgba(0,0,0,.25)}
+.card:not(.soon):hover .ico{transform:scale(1.2) rotate(-6deg)}
+.ico{display:inline-block;transition:transform .25s ease}
+.card .btn{transition:transform .15s ease,filter .15s ease}.card .btn:hover{transform:scale(1.06);filter:brightness(1.1)}
+@media(prefers-reduced-motion:reduce){.card,.ico,.card .btn{transition:none}.card:not(.soon):hover{transform:none}.card:not(.soon):hover .ico{transform:none}}
+.card h2{margin:0;font-size:18px}.card p{margin:0;flex:1;overflow:auto}.ico{font-size:30px;align-self:flex-start}
+.cat{font-size:17px;margin:22px 4px 10px}.cat:first-of-type{margin-top:6px}
 .card.soon{opacity:.6}.tag{align-self:flex-start;border:1px solid var(--mut);color:var(--mut);border-radius:6px;padding:6px 10px;font-size:14px}
 </style></head><body><main>
 <header><h1>Touhou Games</h1>
 <div class="bar"><button id="thm" class="ghost" data-ti="theme"></button><button id="lng" class="ghost"></button><a id="dc" class="btn" target="_blank" rel="noopener" data-ti="dctitle">Discord</a></div></header>
 <p class="intro m" data-i="intro"></p>
+<h2 class="cat" data-i="catd"></h2>
+<div class="grid">
+<div class="card soon"><div class="ico">🧩</div><h2>Connections</h2><p data-i="cn"></p><span class="tag" data-i="soon"></span></div>
+</div>
+<h2 class="cat" data-i="catm"></h2>
 <div class="grid">
 <div class="card"><div class="ico">🎵</div><h2>Music Room</h2><p data-i="mr"></p><a class="btn" href="music-room/" data-i="play"></a></div>
-<div class="card soon"><div class="ico">🧩</div><h2>Connections</h2><p data-i="cn"></p><span class="tag" data-i="soon"></span></div>
 </div></main>
 <script>
 const DISCORD_URL="https://discord.gg/REPLACE";   // link zaproszenia do Discorda
 const I18N={
-pl:{intro:"Fanowskie gry przeglądarkowe w klimacie Touhou. Wybierz grę:",mr:"Multiplayerowe zgadywanie muzyki z Touhou. Zagraj ze znajomymi w pokoju z czatem i własnymi ustawieniami.",cn:"Pogrupuj hasła z uniwersum Touhou w ukryte kategorie – odpowiednik NYT Connections.",play:"Zagraj",soon:"Wkrótce",theme:"Zmień motyw",dctitle:"Dołącz do naszego Discorda"},
-en:{intro:"Fan-made Touhou browser games. Pick a game:",mr:"Multiplayer Touhou music guessing. Play with friends in a room with chat and custom settings.",cn:"Group Touhou terms into hidden categories – a take on NYT Connections.",play:"Play",soon:"Coming soon",theme:"Toggle theme",dctitle:"Join our Discord"}};
+pl:{catd:"📅 Daily gierki",catm:"👥 Multiplayer",intro:"Fanowskie gry przeglądarkowe w klimacie Touhou. Wybierz grę:",mr:"Multiplayerowe zgadywanie muzyki z Touhou. Zagraj ze znajomymi w pokoju z czatem i własnymi ustawieniami.",cn:"Codzienna łamigłówka: pogrupuj hasła z uniwersum Touhou w ukryte kategorie – odpowiednik NYT Connections.",play:"Zagraj",soon:"Wkrótce",theme:"Zmień motyw",dctitle:"Dołącz do naszego Discorda"},
+en:{catd:"📅 Daily games",catm:"👥 Multiplayer",intro:"Fan-made Touhou browser games. Pick a game:",mr:"Multiplayer Touhou music guessing. Play with friends in a room with chat and custom settings.",cn:"A daily puzzle: group Touhou terms into hidden categories – a take on NYT Connections.",play:"Play",soon:"Coming soon",theme:"Toggle theme",dctitle:"Join our Discord"}};
 const $=id=>document.getElementById(id);
 let lang=(navigator.language||"").toLowerCase().startsWith("pl")?"pl":"en";try{const sl=localStorage.getItem("tmrLang");if(sl)lang=sl}catch(e){}
 function applyLang(){document.documentElement.lang=lang;
