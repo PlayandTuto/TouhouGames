@@ -1,5 +1,5 @@
 // Deterministyczny generator dziennej łamigłówki
-const EPOCH = Date.UTC(2026, 10, 23); // #1 = 23.11.2026
+const EPOCH = Date.UTC(2026, 10, 24); // #1 = 24.11.2026
  
 function mulberry32(a) {
   return function () {
@@ -72,5 +72,42 @@ function generatePuzzle(n) {
   throw new Error("Nie udało się wygenerować łamigłówki " + n);
 }
  
-if (typeof module !== "undefined") module.exports = { generatePuzzle, countPartitions, dayNumber };
+// Data dla numeru łamigłówki (#1 = 23.11.2026)
+function dateOfDay(n) {
+  const d = new Date(EPOCH + (n - 1) * 86400000);
+  return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+function dateKey(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+ 
+// Specjalna zagadka ustawiona ręcznie w special.js (jeśli jest i jest poprawna)
+function specialPuzzle(n) {
+  if (typeof SPECIAL === "undefined") return null;
+  const sp = SPECIAL[dateKey(dateOfDay(n))];
+  if (!sp) return null;
+  try {
+    const groups = sp.groups.map(g => {
+      const base = g.cat ? CATS.find(c => c.id === g.cat) : null;
+      if (g.cat && !base) throw new Error("nieznana kategoria " + g.cat);
+      const cat = base ? Object.assign({}, base, g.pl ? { pl: g.pl } : {}, g.en ? { en: g.en } : {}, g.lv != null ? { lv: g.lv } : {})
+                       : { id: "special" + Math.random(), lv: g.lv, pl: g.pl, en: g.en, note: !!g.note, m: g.m };
+      return { cat, members: g.m.slice() };
+    });
+    const all = groups.flatMap(g => g.members);
+    if (groups.length !== 4 || groups.some(g => g.members.length !== 4)) throw new Error("potrzeba 4 grup po 4 postacie");
+    if (new Set(all).size !== 16) throw new Error("postacie się powtarzają");
+    all.forEach(id => { if (!CHARS[id]) throw new Error("nieznana postać " + id); });
+    if (countPartitions(all, groups.map(g => g.cat)) !== 1)
+      console.warn("[special " + dateKey(dateOfDay(n)) + "] łamigłówka ma więcej niż jedno rozwiązanie!");
+    return { n, groups, tiles: shuffle(all, mulberry32(n * 7 + 3)), title: sp.title || null, special: true };
+  } catch (e) {
+    console.error("[special " + dateKey(dateOfDay(n)) + "] " + e.message + " — używam zwykłej łamigłówki");
+    return null;
+  }
+}
+ 
+function getPuzzle(n) { return specialPuzzle(n) || generatePuzzle(n); }
+ 
+if (typeof module !== "undefined") module.exports = { generatePuzzle, getPuzzle, countPartitions, dayNumber, dateOfDay, dateKey };
  
