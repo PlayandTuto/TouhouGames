@@ -82,6 +82,8 @@
   .arch a:hover, .arch a.cur { background: color-mix(in srgb, var(--fg) 8%, transparent); }
   .arch .d { color: var(--muted); font-size: 13px; }
   .arch .st { font-size: 18px; min-width: 24px; text-align: right; }
+  .topcd { text-align: center; margin: -10px 0 16px; font-size: 14px; color: var(--muted); }
+  .topcd b { color: var(--fg); font-variant-numeric: tabular-nums; }
   .banner { text-align: center; margin: -10px 0 16px; font-size: 14px; }
   .banner a { color: var(--accent); font-weight: 600; }
   .help { text-align: left; font-size: 15px; line-height: 1.5; }
@@ -106,6 +108,7 @@
 <main>
   <h1>Touhou <span>Connections</span></h1>
   <p class="sub" id="sub"></p>
+  <div class="topcd" id="topcd"></div>
   <div class="banner" id="banner"></div>
   <div class="grid" id="grid"></div>
   <div class="mistakes"><span id="mistLabel"></span><span id="dots"></span></div>
@@ -142,7 +145,7 @@
         <p>Każda łamigłówka ma dokładnie jedno rozwiązanie. Uważaj na postacie, które pasują do kilku grup!</p>
         <p><span class="sw" style="background:var(--c0)"></span>łatwe · <span class="sw" style="background:var(--c1)"></span>
         <span class="sw" style="background:var(--c2)"></span> · <span class="sw" style="background:var(--c3)"></span>podchwytliwe</p>
-        <p>Nowa łamigłówka codziennie o północy.</p>`, play: "Graj" },
+        <p>Nowa łamigłówka codziennie o 00:00 UTC (w Polsce o 1:00, latem o 2:00).</p>`, play: "Graj" },
     en: { sub: n => `Puzzle #${n} · make 4 groups of 4 characters`, mistakes: "Mistakes remaining:",
       shuffle: "Shuffle", desel: "Deselect all", submit: "Submit", results: "View results",
       oneAway: "One away…", already: "Already guessed!", win: ["Perfect!", "Great!", "Solid!", "Phew!"],
@@ -156,7 +159,7 @@
         <p>Each puzzle has exactly one solution. Watch out for characters that fit more than one group!</p>
         <p><span class="sw" style="background:var(--c0)"></span>easy · <span class="sw" style="background:var(--c1)"></span>
         <span class="sw" style="background:var(--c2)"></span> · <span class="sw" style="background:var(--c3)"></span>tricky</p>
-        <p>A new puzzle every day at midnight.</p>`, play: "Play" },
+        <p>A new puzzle every day at 00:00 UTC.</p>`, play: "Play" },
   };
   // ── LINK DO DISCORDA (ten sam co na stronie głównej)
   const DISCORD_URL = "https://discord.gg/REPLACE";
@@ -241,6 +244,7 @@
     $("banner").innerHTML = (P.title ? `<div><b>${P.title[lang] || P.title.pl}</b></div>` : "") +
       (IS_ARCHIVE ? `<div>${t().archiveOf} · <a href="?">${t().backToday}</a></div>` : "");
     $("mistLabel").textContent = t().mistakes;
+    tickTop();
     $("shuffleBtn").textContent = t().shuffle;
     $("deselBtn").textContent = t().desel;
     $("submitBtn").textContent = t().submit;
@@ -324,10 +328,13 @@
   }
 
   function countdown() {
-    const now = new Date(), mid = new Date(now); mid.setHours(24, 0, 0, 0);
-    const s = Math.max(0, Math.floor((mid - now) / 1000));
+    // do najbliższej północy UTC
+    const s = Math.max(0, Math.floor((86400000 - Date.now() % 86400000) / 1000));
     return [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(x => String(x).padStart(2, "0")).join(":");
   }
+
+  function tickTop() { $("topcd").innerHTML = `${t().next} <b>${countdown()}</b>`; }
+  setInterval(tickTop, 1000);
 
   function openModal(html) {
     $("modal").innerHTML = `<button class="close" aria-label="Close">×</button>` + html;
