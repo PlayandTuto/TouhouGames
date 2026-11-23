@@ -34,6 +34,7 @@
   .tile:active { transform: scale(.96); }
   .tile .n { font-weight: 800; font-size: clamp(12px, 3.6vw, 18px); text-transform: uppercase; line-height: 1.1;
     text-align: center; word-break: break-word; }
+  .tile .n.long { font-size: clamp(9px, 2.7vw, 15px); }
   .tile .s { font-size: clamp(9px, 2.4vw, 12px); opacity: .7; margin-top: 3px; text-align: center; }
   .tile.sel { background: var(--sel); color: var(--sel-fg); }
   .tile.pop { animation: pop .35s ease; }
@@ -69,14 +70,32 @@
   .stats { display: flex; justify-content: center; gap: 18px; margin: 14px 0; }
   .stats div { display: flex; flex-direction: column; } .stats b { font-size: 26px; } .stats span { font-size: 12px; color: var(--muted); }
   .countdown { color: var(--muted); margin: 10px 0 16px; }
+  .topbar .tools a { display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid color-mix(in srgb, var(--fg) 25%, transparent); border-radius: 8px; padding: 6px 10px; }
+  .topbar .tools a svg { width: 18px; height: 18px; fill: currentColor; }
+  .topbar a#back { white-space: nowrap; }
+  @media (max-width: 480px) { .topbar .bk { display: none; } .topbar .tools { gap: 5px; }
+    .topbar button, .topbar .tools a { padding: 6px 8px; } }
+  .arch { max-height: 60vh; overflow-y: auto; text-align: left; margin: 8px -6px 0; }
+  .arch a { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: 8px; color: var(--fg); text-decoration: none; }
+  .arch a:hover, .arch a.cur { background: color-mix(in srgb, var(--fg) 8%, transparent); }
+  .arch .d { color: var(--muted); font-size: 13px; }
+  .arch .st { font-size: 18px; min-width: 24px; text-align: right; }
+  .banner { text-align: center; margin: -10px 0 16px; font-size: 14px; }
+  .banner a { color: var(--accent); font-weight: 600; }
   .help { text-align: left; font-size: 15px; line-height: 1.5; }
   .help .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; margin-right: 4px; }
 </style>
 </head>
 <body>
 <div class="topbar">
-  <a href="../" id="back">← Touhou Games</a>
+  <a href="../" id="back">←<span class="bk"> Touhou Games</span></a>
   <div class="tools">
+    <a id="discordBtn" href="#" target="_blank" rel="noopener" aria-label="Discord" title="Discord">
+      <svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18 18 0 0 0-5.6 0L8.6 3a19.5 19.5 0 0 0-4.9 1.4C.6 9 0 13.6.3 18.1a19.8 19.8 0 0 0 6 3l1.3-2.1c-.7-.3-1.4-.6-2-1l.5-.4a14 14 0 0 0 11.8 0l.5.4-2 1 1.3 2.1a19.7 19.7 0 0 0 6-3c.5-5.2-.8-9.7-3.4-13.7ZM8.5 15.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z"/></svg>
+    </a>
+    <button id="archiveBtn" aria-label="Archive" title="Archiwum">📅</button>
     <button id="helpBtn" aria-label="Help">?</button>
     <button id="statsBtn" aria-label="Stats">📊</button>
     <button id="langBtn">EN</button>
@@ -87,6 +106,7 @@
 <main>
   <h1>Touhou <span>Connections</span></h1>
   <p class="sub" id="sub"></p>
+  <div class="banner" id="banner"></div>
   <div class="grid" id="grid"></div>
   <div class="mistakes"><span id="mistLabel"></span><span id="dots"></span></div>
   <div class="controls">
@@ -104,6 +124,7 @@
 
 <script src="data.js"></script>
 <script src="gen.js"></script>
+<script src="special.js"></script>
 <script>
 (() => {
   // ───── teksty PL/EN
@@ -113,7 +134,9 @@
       oneAway: "Prawie! Brakuje jednej…", already: "Już to próbowałeś!", win: ["Idealnie!", "Świetnie!", "Nieźle!", "Uff!"],
       lose: "Następnym razem się uda!", next: "Następna łamigłówka za", copy: "Kopiuj wynik", copied: "Skopiowano do schowka!",
       played: "Rozegrane", winPct: "Wygrane %", streak: "Seria", maxStreak: "Najdł. seria", stats: "Statystyki",
-      helpT: "Jak grać",
+      helpT: "Jak grać", archive: "Archiwum", today: "Dzisiaj", backToday: "Wróć do dzisiejszej łamigłówki",
+      archiveNote: "Gra w archiwum nie wpływa na statystyki ani serię.", archiveOf: "Łamigłówka z archiwum",
+      months: ["sty","lut","mar","kwi","maj","cze","lip","sie","wrz","paź","lis","gru"],
       help: `<p>Znajdź cztery grupy po cztery postacie z Touhou, które coś łączy.</p>
         <p>Zaznacz cztery kafelki i kliknij <b>Sprawdź</b>. Masz 4 pomyłki.</p>
         <p>Każda łamigłówka ma dokładnie jedno rozwiązanie. Uważaj na postacie, które pasują do kilku grup!</p>
@@ -125,7 +148,9 @@
       oneAway: "One away…", already: "Already guessed!", win: ["Perfect!", "Great!", "Solid!", "Phew!"],
       lose: "Next time!", next: "Next puzzle in", copy: "Share result", copied: "Copied to clipboard!",
       played: "Played", winPct: "Win %", streak: "Streak", maxStreak: "Max streak", stats: "Statistics",
-      helpT: "How to play",
+      helpT: "How to play", archive: "Archive", today: "Today", backToday: "Back to today's puzzle",
+      archiveNote: "Archive games don't affect your stats or streak.", archiveOf: "Archive puzzle",
+      months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
       help: `<p>Find four groups of four Touhou characters that share something in common.</p>
         <p>Select four tiles and tap <b>Submit</b>. You can make 4 mistakes.</p>
         <p>Each puzzle has exactly one solution. Watch out for characters that fit more than one group!</p>
@@ -133,6 +158,8 @@
         <span class="sw" style="background:var(--c2)"></span> · <span class="sw" style="background:var(--c3)"></span>tricky</p>
         <p>A new puzzle every day at midnight.</p>`, play: "Play" },
   };
+  // ── LINK DO DISCORDA (ten sam co na stronie głównej)
+  const DISCORD_URL = "https://discord.gg/REPLACE";
   const COLORS = ["var(--c0)", "var(--c1)", "var(--c2)", "var(--c3)"];
   const EMOJI = ["🟨", "🟩", "🟦", "🟪"];
 
@@ -163,14 +190,25 @@
   });
   const t = () => T[lang];
 
-  // ───── dzisiejsza łamigłówka (reset o lokalnej północy)
-  const today = new Date();
-  const N = dayNumber(today);
-  const P = generatePuzzle(N);
+  // ───── która łamigłówka: dzisiejsza albo z archiwum (?d=numer)
+  const TODAY = dayNumber(new Date());
+  const reqN = parseInt(new URLSearchParams(location.search).get("d"), 10);
+  const N = reqN >= 1 && reqN <= TODAY ? reqN : TODAY;
+  const IS_ARCHIVE = N !== TODAY;
   const KEY = "tc-state-" + N;
-  const catOf = id => P.groups.findIndex(g => g.members.includes(id));
 
-  let S = store.get(KEY, null) || { order: P.tiles.slice(), solved: [], guesses: [], mistakes: 0, done: false };
+  // zapis gry przechowuje też samą łamigłówkę, więc zmiany w data.js nie psują rozpoczętych gier
+  const snap = p => ({ title: p.title || null, special: !!p.special, tiles: p.tiles,
+    groups: p.groups.map(g => ({ members: g.members, cat: { lv: g.cat.lv, pl: g.cat.pl, en: g.cat.en, note: !!g.cat.note } })) });
+  let S = store.get(KEY, null);
+  if (S && !S.p) { // stary zapis bez łamigłówki: zachowaj, jeśli pasuje do obecnej
+    const fresh = snap(getPuzzle(N));
+    if (S.order && S.order.slice().sort().join() === fresh.tiles.slice().sort().join()) S.p = fresh; else S = null;
+  }
+  if (!S) { const p = snap(getPuzzle(N)); S = { p, order: p.tiles.slice(), solved: [], guesses: [], mistakes: 0, done: false }; }
+  const P = S.p;
+  const catOf = id => P.groups.findIndex(g => g.members.includes(id));
+  const fmtDate = n => { const d = dateOfDay(n); return `${d.getDate()} ${t().months[d.getMonth()]} ${d.getFullYear()}`; };
   let sel = [];
 
   const $ = id => document.getElementById(id);
@@ -199,7 +237,9 @@
     document.documentElement.lang = lang;
     $("themeBtn").textContent = theme === "dark" ? "☀️" : "🌙";
     $("langBtn").textContent = lang === "pl" ? "EN" : "PL";
-    $("sub").textContent = t().sub(N);
+    $("sub").textContent = t().sub(N) + (IS_ARCHIVE ? ` · ${fmtDate(N)}` : "");
+    $("banner").innerHTML = (P.title ? `<div><b>${P.title[lang] || P.title.pl}</b></div>` : "") +
+      (IS_ARCHIVE ? `<div>${t().archiveOf} · <a href="?">${t().backToday}</a></div>` : "");
     $("mistLabel").textContent = t().mistakes;
     $("shuffleBtn").textContent = t().shuffle;
     $("deselBtn").textContent = t().desel;
@@ -216,7 +256,7 @@
         const [n, s] = CHARS[id];
         const b = document.createElement("button");
         b.className = "tile" + (sel.includes(id) ? " sel" : "") + (popIds && popIds.includes(id) ? " pop" : "");
-        b.innerHTML = `<span class="n">${n}</span>${s ? `<span class="s">${s}</span>` : ""}`;
+        b.innerHTML = `<span class="n${n.replace(/ .*/, "").length > 9 ? " long" : ""}">${n}</span>${s ? `<span class="s">${s}</span>` : ""}`;
         b.onclick = () => toggle(id);
         grid.appendChild(b);
       });
@@ -259,6 +299,7 @@
 
   function finish(won) {
     S.done = true; S.won = won;
+    if (IS_ARCHIVE) { setTimeout(showResults, 900); return; }
     const st = store.get("tc-stats", { played: 0, wins: 0, streak: 0, max: 0, last: 0 });
     if (st.lastPlayed !== N) {
       st.played++; st.lastPlayed = N;
@@ -300,9 +341,11 @@
     const title = S.won ? t().win[Math.min(S.mistakes, 3)] : t().lose;
     openModal(`<h2>${title}</h2><div>Touhou Connections #${N}</div>
       <div class="emoji">${emojiGrid().replace(/\n/g, "<br>")}</div>
-      ${statsHtml()}
-      <div class="countdown">${t().next} <b id="cd">${countdown()}</b></div>
-      <button class="primary" id="shareBtn">${t().copy}</button>`);
+      ${IS_ARCHIVE ? `<div class="countdown">${t().archiveNote}</div>`
+                   : `${statsHtml()}<div class="countdown">${t().next} <b id="cd">${countdown()}</b></div>`}
+      <button class="primary" id="shareBtn">${t().copy}</button>
+      <button id="archBtn2" style="margin-left:6px">${t().archive}</button>`);
+    $("archBtn2").onclick = showArchive;
     openModal.timer = setInterval(() => { const el = $("cd"); if (el) el.textContent = countdown(); }, 1000);
     $("shareBtn").onclick = async () => {
       const text = `Touhou Connections #${N}\n${emojiGrid()}\n${location.href.split("#")[0]}`;
@@ -310,6 +353,21 @@
       catch { prompt("", text); }
     };
   }
+
+  function showArchive() {
+    let rows = "";
+    for (let n = TODAY; n >= 1; n--) {
+      const st = store.get("tc-state-" + n, null);
+      const icon = !st ? "" : st.done ? (st.won ? "✅" : "❌") : (st.guesses && st.guesses.length ? "▶️" : "");
+      const sp = (st && st.p && st.p.special) || (!st && typeof specialPuzzle === "function" && specialPuzzle(n)) ? " ⭐" : "";
+      rows += `<a href="${n === TODAY ? "?" : "?d=" + n}" class="${n === N ? "cur" : ""}">
+        <span><b>#${n}</b>${sp} <span class="d">· ${n === TODAY ? t().today : fmtDate(n)}</span></span>
+        <span class="st">${icon}</span></a>`;
+    }
+    openModal(`<h2>${t().archive}</h2><div class="countdown" style="margin:0">${t().archiveNote}</div><div class="arch">${rows}</div>`);
+  }
+  $("archiveBtn").onclick = showArchive;
+  $("discordBtn").href = DISCORD_URL;
 
   $("shuffleBtn").onclick = () => {
     const rest = S.order.filter(id => !S.solved.includes(catOf(id)));
@@ -326,7 +384,7 @@
   document.addEventListener("keydown", e => { if (e.key === "Enter") submit(); if (e.key === "Escape") closeModal(); });
 
   // po północy (karta otwarta przez noc) przeładuj na nową łamigłówkę
-  setInterval(() => { if (dayNumber(new Date()) !== N) location.reload(); }, 30000);
+  if (!IS_ARCHIVE) setInterval(() => { if (dayNumber(new Date()) !== TODAY) location.reload(); }, 30000);
 
   render();
   if (!store.get("tc-seen-help", false)) { store.set("tc-seen-help", true); $("helpBtn").onclick(); }
