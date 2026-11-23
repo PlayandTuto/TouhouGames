@@ -17,7 +17,7 @@ button,.btn{background:var(--ac);color:#fff;border:0;border-radius:6px;padding:8
 .ghost{background:transparent;color:var(--fg);border:1px solid var(--mut)}#dc{background:#5865F2}
 input{padding:8px;border-radius:6px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);font-size:15px;min-width:0}
 .row{display:flex;gap:6px;margin-top:6px}.row input{flex:1}.m{color:var(--mut);font-size:13px}
-#chat{height:180px;overflow:auto;font-size:14px}ul{list-style:none;padding:0;margin:0}li{display:flex;justify-content:space-between;padding:3px 0}
+#chat{height:340px;overflow:auto;font-size:14px}ul{list-style:none;padding:0;margin:0}li{display:flex;justify-content:space-between;padding:3px 0}
 #big{font-size:24px;text-align:center;margin:6px 0}#sc{position:fixed;right:0;bottom:0;width:300px;height:166px;border:0;opacity:0;pointer-events:none}
 label{display:block;margin-top:8px;font-size:14px}#gl label{display:flex;gap:6px;margin:3px 0;align-items:center}#gl{max-height:240px;overflow:auto}
 .pg{margin-bottom:8px}.pg>label{font-weight:600}.pg .g{margin-left:18px}.off{opacity:.45}
@@ -33,7 +33,7 @@ input[type=number]{width:80px;flex:none!important;margin-left:6px}
 <header><h1>Touhou Music Room <span class="m" data-i="sub"></span></h1>
 <div class="bar"><a id="hub" class="btn ghost" href="../" data-i="hub"></a><button id="thm" class="ghost" data-ti="theme"></button><button id="lng" class="ghost"></button><a id="dc" class="btn" target="_blank" rel="noopener" data-ti="dctitle">Discord</a></div></header>
 <div class="c"><h2 data-i="room"></h2>
-<div class="row"><input id="nick" maxlength="16" data-ph="nick"><input id="room" maxlength="24" minlength="3" value="main" data-ph="code"></div>
+<div class="row"><input id="nick" maxlength="16" data-ph="nick"><input id="room" maxlength="24" minlength="3" value="" data-ph="code"></div>
 <div class="row"><button id="jb" data-i="join"></button></div>
 <p class="m" id="st"></p>
 <h2 data-i="players"></h2><ul id="pl"></ul></div>
@@ -52,7 +52,7 @@ input[type=number]{width:80px;flex:none!important;margin-left:6px}
 const WORKER="wss://touhou-music-room.touhoumusicroom.workers.dev";   // adres Twojego Workera (wss://...)
 const DISCORD_URL="https://discord.gg/REPLACE";                         // link zaproszenia do Discorda
 const I18N={
-pl:{hub:"← Gry",sub:"– fan remake",room:"Pokój",nick:"Nick",code:"Kod pokoju",join:"Dołącz / utwórz",intro:"Pierwsza osoba w pokoju jest hostem (może startować rundy). Gdy host wyjdzie, rolę przejmuje następna osoba.",players:"Gracze",round:"Runda",start:"Start gry",skip:"Skip",stop:"Stop",play:"▶ Play",guessph:"Jaki to utwór?",guess:"Zgaduj",vol:"Głośność",settings:"Ustawienia gry",sethint:"(zmienia host, w lobby)",allowed:"Dozwolone gry:",rounds:"Liczba rund",sec:"Czas na zgadywanie (s)",cd:"Przerwa między rundami (s)",chat:"Czat",msg:"Wiadomość",send:"Wyślij",theme:"Zmień motyw",dctitle:"Dołącz do naszego Discorda",other:"Inne",
+pl:{hub:"← Gry",sub:"– fan remake",room:"Pokój",nick:"Nick",code:"Kod pokoju",join:"Dołącz / utwórz",intro:"Pierwsza osoba w pokoju jest hostem (może startować rundy). Gdy host wyjdzie, rolę przejmuje następna osoba.",players:"Gracze",round:"Runda",start:"Start gry",skip:"Pomiń",stop:"Stop",play:"▶ Play",guessph:"Jaki to utwór?",guess:"Zgaduj",vol:"Głośność",settings:"Ustawienia gry",sethint:"(zmienia host, w lobby)",allowed:"Dozwolone gry:",rounds:"Liczba rund",sec:"Czas na zgadywanie (s)",cd:"Przerwa między rundami (s)",chat:"Czat",msg:"Wiadomość",send:"Wyślij",theme:"Zmień motyw",dctitle:"Dołącz do naszego Discorda",other:"Inne",
 needw:"⚠ Ustaw adres Workera (WORKER) w index.html.",conn:"Łączenie…",badurl:"Nieprawidłowy adres Workera.",to:"Brak odpowiedzi serwera w 10 s – spróbuj ponownie.",short:"Nazwa pokoju musi mieć min. 3 znaki (litery lub cyfry).",closed:"Rozłączono (pokój pełny, zły adres Workera lub brak dostępu). Spróbuj ponownie.",joined:"Jesteś w pokoju „{0}”.",
 rinfo:"Runda {0}/{1} – zgadnij tytuł!",ans:"Odpowiedź: {0} ({1})",next:"Następna za ",fin:"Koniec gry – host może wystartować kolejną.",
 aload:"Ładowanie utworu…",aplay:"♪ Gra",astuck:"Nie wystartowało – kliknij ▶ Play (przeglądarka mogła zablokować autoodtwarzanie).",aerr:"⚠ SoundCloud zwrócił błąd (link prywatny lub osadzanie wyłączone?)",aph:"⚠ W worker/src/tracks.js został placeholder – podmień link SoundCloud.",
