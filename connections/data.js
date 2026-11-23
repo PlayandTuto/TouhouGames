@@ -246,7 +246,7 @@ const CATS = [
   {id:"repeat", lv:1, pl:"Powtórzona sylaba na początku imienia", en:"Repeated syllable at the start of the name", m:["yuyuko","kokoro","benben","momoyo","mimichan"]},
   {id:"stage1", lv:2, pl:"Bossowie etapu 1", en:"Stage 1 bosses",
    m:["rumia","letty","wriggle","minoriko","yamame","nazrin","yuyuko","wakasagihime","seiran","larva","eika","mike","ubame","rika","orange","sara"]},
-  {id:"midbossonly", lv:2, pl:"Tylko midbossowie (Th06–Th18)", en:"Only ever midbosses (Th06–Th18)",
+  {id:"midbossonly", lv:2, pl:"Tylko midbossowie (Th06–Th20)", en:"Only ever midbosses (Th06–Th18)",
    m:["daiyousei","koakuma","lily","tewi","momiji","kisume"]},
   {id:"english", lv:3, pl:"Angielskie słowo w imieniu lub nazwisku", en:"An English word in the name",
    m:["sunny","luna","star","lily","orange","evileye","larva","fortuneteller","bloodvesselyinyangorbs","doremy","letty","wriggle","patchouli","medicine","clownpiece","remilia","flandre","hecatia"]},
