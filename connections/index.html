@@ -1,30 +1,315 @@
 <!DOCTYPE html>
-<html lang="pl"><head><meta charset="utf-8">
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Touhou Connections</title>
-<script>try{document.documentElement.dataset.theme=localStorage.getItem("tmrTheme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light")}catch(e){document.documentElement.dataset.theme="light"}</script>
 <style>
-:root{--bg:#f4ecea;--fg:#222;--card:#fff;--ac:#c0392b;--mut:#777}
-:root[data-theme="dark"]{--bg:#16121a;--fg:#eee;--card:#241d2b;--mut:#999}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px system-ui,sans-serif}
-main{max-width:900px;margin:0 auto;padding:12px}
-header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;background:var(--card);border-radius:10px;padding:8px 12px}
-h1{font-size:20px;margin:0}.bar{display:flex;gap:6px}.m{color:var(--mut)}
-button,.btn{background:var(--ac);color:#fff;border:0;border-radius:6px;padding:8px 12px;font-size:15px;cursor:pointer;text-decoration:none;display:inline-block}
-.ghost{background:transparent;color:var(--fg);border:1px solid var(--mut)}
-.box{background:var(--card);border-radius:10px;padding:32px 16px;margin-top:12px;text-align:center}
-.box .ico{font-size:48px}
-</style></head><body><main>
-<header><h1>Touhou Connections</h1>
-<div class="bar"><a class="btn ghost" href="../" data-i="hub"></a><button id="thm" class="ghost"></button><button id="lng" class="ghost"></button></div></header>
-<div class="box"><div class="ico">🧩</div><h2 data-i="t"></h2><p class="m" data-i="d"></p></div>
+  :root {
+    --bg: #faf7f2; --fg: #1d1a22; --muted: #6b6573; --tile: #ece6dc; --tile-fg: #1d1a22;
+    --sel: #4a3f5c; --sel-fg: #fff; --btn-border: #1d1a22; --card: #fff;
+    --c0: #f9df6d; --c1: #a0c35a; --c2: #b0c4ef; --c3: #ba81c5; --accent: #c8102e;
+  }
+  [data-theme="dark"] {
+    --bg: #16141b; --fg: #f1edf5; --muted: #a49cae; --tile: #2c2834; --tile-fg: #f1edf5;
+    --sel: #d8cfe6; --sel-fg: #16141b; --btn-border: #f1edf5; --card: #221f29;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif; transition: background .2s, color .2s; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fg) 12%, transparent); }
+  .topbar a { color: var(--fg); text-decoration: none; font-weight: 600; }
+  .topbar .tools { display: flex; gap: 8px; }
+  .topbar button { background: none; border: 1px solid color-mix(in srgb, var(--fg) 25%, transparent);
+    color: var(--fg); border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; font-size: 14px; }
+  main { max-width: 640px; margin: 0 auto; padding: 20px 12px 48px; }
+  h1 { font-family: Georgia, "Times New Roman", serif; font-size: 34px; margin: 8px 0 2px; text-align: center; }
+  h1 span { color: var(--accent); }
+  .sub { text-align: center; color: var(--muted); margin: 0 0 18px; font-size: 15px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .tile { aspect-ratio: 1.35 / 1; border: 0; border-radius: 8px; background: var(--tile); color: var(--tile-fg);
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 4px; user-select: none; transition: transform .12s, background .15s; font: inherit; }
+  .tile:active { transform: scale(.96); }
+  .tile .n { font-weight: 800; font-size: clamp(12px, 3.6vw, 18px); text-transform: uppercase; line-height: 1.1;
+    text-align: center; word-break: break-word; }
+  .tile .s { font-size: clamp(9px, 2.4vw, 12px); opacity: .7; margin-top: 3px; text-align: center; }
+  .tile.sel { background: var(--sel); color: var(--sel-fg); }
+  .tile.pop { animation: pop .35s ease; }
+  @keyframes pop { 40% { transform: translateY(-6px); } }
+  .grid.shake { animation: shake .4s; }
+  @keyframes shake { 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
+  .solved { grid-column: 1 / -1; border-radius: 8px; padding: 12px 8px; text-align: center; color: #1d1a22;
+    animation: reveal .4s ease; min-height: 78px; display: flex; flex-direction: column; justify-content: center; }
+  @keyframes reveal { from { transform: scale(.9); opacity: 0; } }
+  .solved .t { font-weight: 800; text-transform: uppercase; font-size: 15px; letter-spacing: .02em; }
+  .solved .m { font-size: 14px; margin-top: 4px; }
+  .solved .jp { font-size: 12px; opacity: .75; margin-top: 3px; }
+  .mistakes { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 18px 0; color: var(--muted); }
+  .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--sel); transition: opacity .3s, transform .3s; }
+  .dot.gone { opacity: 0; transform: scale(.3); }
+  .controls { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .controls button, .modal button { border: 1px solid var(--btn-border); background: transparent; color: var(--fg);
+    border-radius: 999px; padding: 11px 20px; font: inherit; font-weight: 600; cursor: pointer; }
+  .controls button.primary, .modal button.primary { background: var(--fg); color: var(--bg); }
+  .controls button:disabled { opacity: .35; cursor: default; }
+  .toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: var(--fg); color: var(--bg);
+    padding: 10px 16px; border-radius: 8px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 30; }
+  .toast.show { opacity: 1; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center;
+    justify-content: center; z-index: 20; padding: 16px; }
+  .overlay.show { display: flex; }
+  .modal { background: var(--card); color: var(--fg); border-radius: 14px; padding: 24px; max-width: 420px; width: 100%;
+    text-align: center; position: relative; }
+  .modal h2 { margin: 0 0 8px; font-family: Georgia, serif; }
+  .modal .close { position: absolute; top: 8px; right: 10px; border: 0; padding: 6px 10px; font-size: 20px; }
+  .emoji { font-size: 26px; line-height: 1.15; margin: 12px 0; letter-spacing: 2px; }
+  .stats { display: flex; justify-content: center; gap: 18px; margin: 14px 0; }
+  .stats div { display: flex; flex-direction: column; } .stats b { font-size: 26px; } .stats span { font-size: 12px; color: var(--muted); }
+  .countdown { color: var(--muted); margin: 10px 0 16px; }
+  .help { text-align: left; font-size: 15px; line-height: 1.5; }
+  .help .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="../" id="back">← Touhou Games</a>
+  <div class="tools">
+    <button id="helpBtn" aria-label="Help">?</button>
+    <button id="statsBtn" aria-label="Stats">📊</button>
+    <button id="langBtn">EN</button>
+    <button id="themeBtn" aria-label="Theme">🌙</button>
+  </div>
+</div>
+
+<main>
+  <h1>Touhou <span>Connections</span></h1>
+  <p class="sub" id="sub"></p>
+  <div class="grid" id="grid"></div>
+  <div class="mistakes"><span id="mistLabel"></span><span id="dots"></span></div>
+  <div class="controls">
+    <button id="shuffleBtn"></button>
+    <button id="deselBtn"></button>
+    <button id="submitBtn" class="primary"></button>
+  </div>
+  <div class="controls" id="afterControls" style="margin-top:14px;display:none">
+    <button id="resultsBtn" class="primary"></button>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<script src="data.js"></script>
+<script src="gen.js"></script>
 <script>
-const I18N={pl:{hub:"← Gry",t:"Już wkrótce",d:"Ta gra jest w budowie."},en:{hub:"← Games",t:"Coming soon",d:"This game is under construction."}};
-const $=id=>document.getElementById(id);
-let lang=(navigator.language||"").toLowerCase().startsWith("pl")?"pl":"en";try{const sl=localStorage.getItem("tmrLang");if(sl)lang=sl}catch(e){}
-function applyLang(){document.documentElement.lang=lang;document.querySelectorAll("[data-i]").forEach(e=>e.textContent=I18N[lang][e.dataset.i]);$("lng").textContent=lang==="pl"?"EN":"PL"}
-$("lng").onclick=()=>{lang=lang==="pl"?"en":"pl";try{localStorage.setItem("tmrLang",lang)}catch(e){}applyLang()};
-function setTheme(x){document.documentElement.dataset.theme=x;$("thm").textContent=x==="dark"?"☀️":"🌙";try{localStorage.setItem("tmrTheme",x)}catch(e){}}
-$("thm").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
-setTheme(document.documentElement.dataset.theme);applyLang();
-</script></main></body></html>
+(() => {
+  // ───── teksty PL/EN
+  const T = {
+    pl: { sub: n => `Łamigłówka #${n} · stwórz 4 grupy po 4 postacie`, mistakes: "Pozostałe błędy:",
+      shuffle: "Wymieszaj", desel: "Odznacz", submit: "Sprawdź", results: "Wyniki",
+      oneAway: "Prawie! Brakuje jednej…", already: "Już to próbowałeś!", win: ["Idealnie!", "Świetnie!", "Nieźle!", "Uff!"],
+      lose: "Następnym razem się uda!", next: "Następna łamigłówka za", copy: "Kopiuj wynik", copied: "Skopiowano do schowka!",
+      played: "Rozegrane", winPct: "Wygrane %", streak: "Seria", maxStreak: "Najdł. seria", stats: "Statystyki",
+      helpT: "Jak grać",
+      help: `<p>Znajdź cztery grupy po cztery postacie z Touhou, które coś łączy.</p>
+        <p>Zaznacz cztery kafelki i kliknij <b>Sprawdź</b>. Masz 4 pomyłki.</p>
+        <p>Każda łamigłówka ma dokładnie jedno rozwiązanie. Uważaj na postacie, które pasują do kilku grup!</p>
+        <p><span class="sw" style="background:var(--c0)"></span>łatwe · <span class="sw" style="background:var(--c1)"></span>
+        <span class="sw" style="background:var(--c2)"></span> · <span class="sw" style="background:var(--c3)"></span>podchwytliwe</p>
+        <p>Nowa łamigłówka codziennie o północy.</p>`, play: "Graj" },
+    en: { sub: n => `Puzzle #${n} · make 4 groups of 4 characters`, mistakes: "Mistakes remaining:",
+      shuffle: "Shuffle", desel: "Deselect all", submit: "Submit", results: "View results",
+      oneAway: "One away…", already: "Already guessed!", win: ["Perfect!", "Great!", "Solid!", "Phew!"],
+      lose: "Next time!", next: "Next puzzle in", copy: "Share result", copied: "Copied to clipboard!",
+      played: "Played", winPct: "Win %", streak: "Streak", maxStreak: "Max streak", stats: "Statistics",
+      helpT: "How to play",
+      help: `<p>Find four groups of four Touhou characters that share something in common.</p>
+        <p>Select four tiles and tap <b>Submit</b>. You can make 4 mistakes.</p>
+        <p>Each puzzle has exactly one solution. Watch out for characters that fit more than one group!</p>
+        <p><span class="sw" style="background:var(--c0)"></span>easy · <span class="sw" style="background:var(--c1)"></span>
+        <span class="sw" style="background:var(--c2)"></span> · <span class="sw" style="background:var(--c3)"></span>tricky</p>
+        <p>A new puzzle every day at midnight.</p>`, play: "Play" },
+  };
+  const COLORS = ["var(--c0)", "var(--c1)", "var(--c2)", "var(--c3)"];
+  const EMOJI = ["🟨", "🟩", "🟦", "🟪"];
+
+  // ───── bezpieczny localStorage
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+
+  let lang = store.get("lang", (navigator.language || "pl").startsWith("pl") ? "pl" : "en");
+  let theme = store.get("theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const t = () => T[lang];
+
+  // ───── dzisiejsza łamigłówka (reset o lokalnej północy)
+  const today = new Date();
+  const N = dayNumber(today);
+  const P = generatePuzzle(N);
+  const KEY = "tc-state-" + N;
+  const catOf = id => P.groups.findIndex(g => g.members.includes(id));
+
+  let S = store.get(KEY, null) || { order: P.tiles.slice(), solved: [], guesses: [], mistakes: 0, done: false };
+  let sel = [];
+
+  const $ = id => document.getElementById(id);
+  const save = () => store.set(KEY, S);
+
+  function toast(msg) {
+    const el = $("toast"); el.textContent = msg; el.classList.add("show");
+    clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("show"), 1600);
+  }
+
+  function solvedRow(gi) {
+    const g = P.groups[gi], c = g.cat;
+    const div = document.createElement("div");
+    div.className = "solved"; div.style.background = COLORS[c.lv];
+    div.innerHTML = `<div class="t">${c[lang]}</div>
+      <div class="m">${g.members.map(id => CHARS[id][0]).join(", ")}</div>` +
+      (c.note ? `<div class="jp">${g.members.map(id => CHARS[id][2]).join(" · ")}</div>` : "");
+    return div;
+  }
+
+  function render(popIds) {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.lang = lang;
+    $("themeBtn").textContent = theme === "dark" ? "☀️" : "🌙";
+    $("langBtn").textContent = lang === "pl" ? "EN" : "PL";
+    $("sub").textContent = t().sub(N);
+    $("mistLabel").textContent = t().mistakes;
+    $("shuffleBtn").textContent = t().shuffle;
+    $("deselBtn").textContent = t().desel;
+    $("submitBtn").textContent = t().submit;
+    $("resultsBtn").textContent = t().results;
+
+    const grid = $("grid"); grid.innerHTML = "";
+    // po przegranej pokaż brakujące grupy
+    const shown = S.done ? [...S.solved, ...[0,1,2,3].filter(i => !S.solved.includes(i))] : S.solved;
+    shown.forEach(gi => grid.appendChild(solvedRow(gi)));
+    if (!S.done) {
+      S.order.filter(id => !S.solved.includes(catOf(id))).forEach(id => {
+        const [n, s] = CHARS[id];
+        const b = document.createElement("button");
+        b.className = "tile" + (sel.includes(id) ? " sel" : "") + (popIds && popIds.includes(id) ? " pop" : "");
+        b.innerHTML = `<span class="n">${n}</span>${s ? `<span class="s">${s}</span>` : ""}`;
+        b.onclick = () => toggle(id);
+        grid.appendChild(b);
+      });
+    }
+    $("dots").innerHTML = [0,1,2,3].map(i => `<span class="dot${i < S.mistakes ? " gone" : ""}" style="display:inline-block;margin:0 3px"></span>`).join("");
+    $("submitBtn").disabled = sel.length !== 4 || S.done;
+    $("deselBtn").disabled = !sel.length || S.done;
+    $("shuffleBtn").disabled = S.done;
+    document.querySelector(".controls").style.display = S.done ? "none" : "flex";
+    document.querySelector(".mistakes").style.display = S.done ? "none" : "flex";
+    $("afterControls").style.display = S.done ? "flex" : "none";
+  }
+
+  function toggle(id) {
+    if (S.done) return;
+    if (sel.includes(id)) sel = sel.filter(x => x !== id);
+    else if (sel.length < 4) sel.push(id);
+    render();
+  }
+
+  function submit() {
+    if (sel.length !== 4 || S.done) return;
+    const key = sel.slice().sort().join(",");
+    if (S.guesses.some(g => g.slice().sort().join(",") === key)) { toast(t().already); return; }
+    S.guesses.push(sel.slice());
+    const counts = [0,0,0,0]; sel.forEach(id => counts[catOf(id)]++);
+    const hit = counts.indexOf(4);
+    if (hit >= 0) {
+      S.solved.push(hit); sel = [];
+      if (S.solved.length === 4) finish(true);
+      save(); render();
+    } else {
+      S.mistakes++;
+      const grid = $("grid"); grid.classList.remove("shake"); void grid.offsetWidth; grid.classList.add("shake");
+      if (counts.includes(3)) toast(t().oneAway);
+      if (S.mistakes >= 4) { sel = []; finish(false); }
+      save(); render();
+    }
+  }
+
+  function finish(won) {
+    S.done = true; S.won = won;
+    const st = store.get("tc-stats", { played: 0, wins: 0, streak: 0, max: 0, last: 0 });
+    if (st.lastPlayed !== N) {
+      st.played++; st.lastPlayed = N;
+      if (won) { st.wins++; st.streak = st.last === N - 1 ? st.streak + 1 : 1; st.last = N; st.max = Math.max(st.max, st.streak); }
+      else st.streak = 0;
+      store.set("tc-stats", st);
+    }
+    setTimeout(showResults, 900);
+  }
+
+  function emojiGrid() {
+    return S.guesses.map(g => g.map(id => EMOJI[P.groups[catOf(id)].cat.lv]).join("")).join("\n");
+  }
+
+  function statsHtml() {
+    const st = store.get("tc-stats", { played: 0, wins: 0, streak: 0, max: 0 });
+    return `<div class="stats">
+      <div><b>${st.played}</b><span>${t().played}</span></div>
+      <div><b>${st.played ? Math.round(st.wins / st.played * 100) : 0}</b><span>${t().winPct}</span></div>
+      <div><b>${st.streak}</b><span>${t().streak}</span></div>
+      <div><b>${st.max}</b><span>${t().maxStreak}</span></div></div>`;
+  }
+
+  function countdown() {
+    const now = new Date(), mid = new Date(now); mid.setHours(24, 0, 0, 0);
+    const s = Math.max(0, Math.floor((mid - now) / 1000));
+    return [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(x => String(x).padStart(2, "0")).join(":");
+  }
+
+  function openModal(html) {
+    $("modal").innerHTML = `<button class="close" aria-label="Close">×</button>` + html;
+    $("modal").querySelector(".close").onclick = closeModal;
+    $("overlay").classList.add("show");
+  }
+  function closeModal() { $("overlay").classList.remove("show"); clearInterval(openModal.timer); }
+  $("overlay").onclick = e => { if (e.target.id === "overlay") closeModal(); };
+
+  function showResults() {
+    const title = S.won ? t().win[Math.min(S.mistakes, 3)] : t().lose;
+    openModal(`<h2>${title}</h2><div>Touhou Connections #${N}</div>
+      <div class="emoji">${emojiGrid().replace(/\n/g, "<br>")}</div>
+      ${statsHtml()}
+      <div class="countdown">${t().next} <b id="cd">${countdown()}</b></div>
+      <button class="primary" id="shareBtn">${t().copy}</button>`);
+    openModal.timer = setInterval(() => { const el = $("cd"); if (el) el.textContent = countdown(); }, 1000);
+    $("shareBtn").onclick = async () => {
+      const text = `Touhou Connections #${N}\n${emojiGrid()}\n${location.href.split("#")[0]}`;
+      try { await navigator.clipboard.writeText(text); toast(t().copied); }
+      catch { prompt("", text); }
+    };
+  }
+
+  $("shuffleBtn").onclick = () => {
+    const rest = S.order.filter(id => !S.solved.includes(catOf(id)));
+    for (let i = rest.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [rest[i], rest[j]] = [rest[j], rest[i]]; }
+    S.order = rest; save(); render();
+  };
+  $("deselBtn").onclick = () => { sel = []; render(); };
+  $("submitBtn").onclick = submit;
+  $("resultsBtn").onclick = showResults;
+  $("statsBtn").onclick = () => openModal(`<h2>${t().stats}</h2>${statsHtml()}<div class="countdown">${t().next} <b>${countdown()}</b></div>`);
+  $("helpBtn").onclick = () => openModal(`<h2>${t().helpT}</h2><div class="help">${t().help}</div><button class="primary" id="playBtn">${t().play}</button>`) || ($("playBtn").onclick = closeModal);
+  $("langBtn").onclick = () => { lang = lang === "pl" ? "en" : "pl"; store.set("lang", lang); render(); };
+  $("themeBtn").onclick = () => { theme = theme === "dark" ? "light" : "dark"; store.set("theme", theme); render(); };
+  document.addEventListener("keydown", e => { if (e.key === "Enter") submit(); if (e.key === "Escape") closeModal(); });
+
+  // po północy (karta otwarta przez noc) przeładuj na nową łamigłówkę
+  setInterval(() => { if (dayNumber(new Date()) !== N) location.reload(); }, 30000);
+
+  render();
+  if (!store.get("tc-seen-help", false)) { store.set("tc-seen-help", true); $("helpBtn").onclick(); }
+  else if (S.done) setTimeout(showResults, 300);
+})();
+</script>
+</body>
+</html>
