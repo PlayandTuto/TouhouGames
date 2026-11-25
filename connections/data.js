@@ -122,7 +122,7 @@ const CATS = [
    m:["keine", "akyuu", "kosuzu", "sekibanki", "miyoi"]},
   {id:"outsideworld", lv:0, pl:"Postacie z świata zewnętrznego", en:"Characters from Outside World",
    m:["maribel", "renko", "sumireko", "chiyuri", "yumemi"]},
-  {id:"lunarcapital", lv:0, pl:"Mieszkańcy Księżycowej Świątyni", en:"Lunar Capital residents",
+  {id:"lunarcapital", lv:0, pl:"Mieszkańcy Księżycowej Stolicy", en:"Lunar Capital residents",
    m:["toyohime","yorihime","reisenII","sagume"]},
   {id:"Myouren Temple", lv:0, pl:"Mieszkańcy Świątyni Myouren", en:"Myouren Temple residents",
    m:["byakuren", "shou", "nazrin", "ichirin", "murasa", "kogasa", "nue", "kyouko", "koishi"]}, 
