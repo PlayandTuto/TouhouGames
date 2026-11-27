@@ -1,84 +1,147 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Guess the Spell · Touhou Games</title>
 <style>
   :root {
-    --bg: #f6f2ec; --fg: #1e1b24; --muted: #6d6774; --card: #ffffff; --line: #ddd5ca;
-    --ok: #2f9a5a; --bad: #c74343; --part: #d29a00; --accent: #b3122e;
+    --bg: #faf7f2; --fg: #1d1a22; --muted: #6b6573; --tile: #ece6dc; --card: #fff;
+    --btn-border: #1d1a22; --accent: #c8102e; --ok: #4f9a3a; --part: #d9a400; --bad: #c74343;
   }
   [data-theme="dark"] {
-    --bg: #15131a; --fg: #ece8f3; --muted: #9b95a7; --card: #211e28; --line: #39333f;
-    --ok: #3cbc72; --bad: #e05b5b; --part: #e7b42c; --accent: #ff5b70;
+    --bg: #16141b; --fg: #f1edf5; --muted: #a49cae; --tile: #2c2834; --card: #221f29;
+    --btn-border: #f1edf5; --ok: #6cbf52; --part: #e7b42c; --bad: #e05b5b;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--fg); }
-  button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 8px; padding: 6px 12px; }
-  button:disabled { opacity: .45; cursor: default; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif; transition: background .2s, color .2s; }
 
-  .top { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
-  .top .home { margin-right: auto; color: var(--fg); text-decoration: none; font-weight: 600; }
+  /* górny pasek - jak w Connections */
+  .topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fg) 12%, transparent); }
+  .topbar a { color: var(--fg); text-decoration: none; font-weight: 600; }
+  .topbar a#back { white-space: nowrap; }
+  .topbar .tools { display: flex; gap: 8px; }
+  .topbar button { background: none; border: 1px solid color-mix(in srgb, var(--fg) 25%, transparent);
+    color: var(--fg); border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; font-size: 14px; }
+  .topbar .tools a { display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid color-mix(in srgb, var(--fg) 25%, transparent); border-radius: 8px; padding: 6px 10px; }
+  .topbar .tools a svg { width: 18px; height: 18px; fill: currentColor; }
+  @media (max-width: 480px) { .topbar .bk { display: none; } .topbar .tools { gap: 5px; }
+    .topbar button, .topbar .tools a { padding: 6px 8px; } }
 
-  main { max-width: 560px; margin: 0 auto; padding: 16px 16px 48px; }
-  h1 { text-align: center; margin: 6px 0 4px; font-size: 1.9rem; letter-spacing: .5px; }
-  .sub { text-align: center; color: var(--muted); margin: 0 0 16px; font-size: .92rem; }
+  main { max-width: 560px; margin: 0 auto; padding: 20px 12px 48px; }
+  h1 { font-family: Georgia, "Times New Roman", serif; font-size: 34px; margin: 8px 0 2px; text-align: center; }
+  h1 span { color: var(--accent); }
+  .sub { text-align: center; color: var(--muted); margin: 0 0 14px; font-size: 15px; }
+  .topcd { text-align: center; margin: -6px 0 12px; font-size: 14px; color: var(--muted); }
+  .topcd b { color: var(--fg); font-variant-numeric: tabular-nums; }
+  .banner { text-align: center; margin: -4px 0 12px; font-size: 14px; }
+  .banner a { color: var(--accent); font-weight: 600; }
 
   .seg { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-  .seg button.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .seg button { border: 1px solid var(--btn-border); background: transparent; color: var(--fg);
+    border-radius: 999px; padding: 7px 16px; font: inherit; font-weight: 600; cursor: pointer; }
+  .seg button.active { background: var(--fg); color: var(--bg); }
   .seg .d-easy.active { background: #3a9160; border-color: #3a9160; color: #fff; }
   .seg .d-normal.active { background: #3567b5; border-color: #3567b5; color: #fff; }
   .seg .d-hard.active { background: #c77a12; border-color: #c77a12; color: #fff; }
   .seg .d-lunatic.active { background: #8e2bb3; border-color: #8e2bb3; color: #fff; }
-  .diffnote { text-align: center; color: var(--muted); font-size: .85rem; min-height: 1.2em; margin-bottom: 12px; }
+  .diffnote { text-align: center; color: var(--muted); font-size: 13px; min-height: 1.2em; margin-bottom: 14px; }
 
-  .frame { position: relative; width: 100%; max-width: 440px; margin: 0 auto; overflow: hidden; border-radius: 12px; background: #000; border: 1px solid var(--line); aspect-ratio: 6 / 7; }
+  .frame { position: relative; width: 100%; max-width: 440px; margin: 0 auto; overflow: hidden; border-radius: 12px;
+    background: #000; aspect-ratio: 6 / 7; }
   .frame.flip { transform: scaleX(-1); }
-  .frame canvas { display: block; width: 100%; height: 100%; transition: transform .7s ease, filter .4s ease; user-select: none; -webkit-user-drag: none; }
+  .frame canvas { display: block; width: 100%; height: 100%; transition: transform .7s ease, filter .4s ease; }
   .frame.gray canvas { filter: grayscale(1); }
   .frame.noanim canvas { transition: none; }
   .frame .loading { position: absolute; inset: 0; display: grid; place-items: center; color: #aaa; }
 
-  .pips { display: flex; justify-content: center; gap: 6px; margin: 12px 0; }
-  .pip { width: 14px; height: 14px; border-radius: 50%; background: var(--line); }
+  .pips { display: flex; justify-content: center; gap: 7px; margin: 14px 0; }
+  .pip { width: 14px; height: 14px; border-radius: 50%; background: var(--tile); }
   .pip.bad { background: var(--bad); } .pip.part { background: var(--part); } .pip.ok { background: var(--ok); }
 
-  .guessbox { position: relative; display: flex; gap: 6px; }
-  .guessbox input { flex: 1; font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--fg); }
-  .sugg { position: absolute; top: 100%; left: 0; right: 0; z-index: 5; list-style: none; margin: 4px 0 0; padding: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; max-height: 290px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
-  .sugg li { padding: 7px 9px; border-radius: 6px; cursor: pointer; }
-  .sugg li.sel, .sugg li:hover { background: var(--line); }
-  .sugg .meta { display: block; font-size: .8rem; color: var(--muted); }
+  .guessbox { position: relative; display: flex; gap: 8px; }
+  .guessbox input { flex: 1; min-width: 0; font: inherit; padding: 11px 14px; border-radius: 999px;
+    border: 1px solid var(--btn-border); background: var(--card); color: var(--fg); }
+  .pill { border: 1px solid var(--btn-border); background: transparent; color: var(--fg);
+    border-radius: 999px; padding: 11px 20px; font: inherit; font-weight: 600; cursor: pointer; }
+  .pill.primary { background: var(--fg); color: var(--bg); }
+  .sugg { position: absolute; top: 100%; left: 0; right: 0; z-index: 5; list-style: none; margin: 6px 0 0; padding: 4px;
+    background: var(--card); border: 1px solid color-mix(in srgb, var(--fg) 20%, transparent); border-radius: 10px;
+    max-height: 300px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+  .sugg li { padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+  .sugg li.sel, .sugg li:hover { background: var(--tile); }
+  .sugg .meta { display: block; font-size: 12px; color: var(--muted); }
 
   .guesses { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
-  .guesses li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--card); border: 1px solid var(--line); }
+  .guesses li { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 8px; background: var(--tile); }
   .guesses .gname { flex: 1; }
-  .chip { font-size: .75rem; padding: 2px 8px; border-radius: 99px; color: #fff; white-space: nowrap; }
+  .chip { font-size: 12px; padding: 2px 8px; border-radius: 99px; color: #fff; white-space: nowrap; }
   .chip.y { background: var(--ok); } .chip.n { background: var(--bad); }
-  .guesses li.win { border-color: var(--ok); }
+  .guesses li.win { outline: 2px solid var(--ok); }
 
-  .result { margin-top: 16px; padding: 14px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); text-align: center; }
-  .result h2 { margin: 0 0 6px; font-size: 1.2rem; }
-  .result .answer { font-weight: 600; font-size: 1.1rem; }
-  .result .jp, .result .src { color: var(--muted); font-size: .9rem; }
+  .result { margin-top: 16px; padding: 16px; border-radius: 12px; background: var(--tile); text-align: center; }
+  .answer { font-weight: 700; font-size: 18px; }
+  .jp, .src { color: var(--muted); font-size: 14px; margin-top: 2px; }
   .result .actions { margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-  .stats { text-align: center; color: var(--muted); font-size: .9rem; margin-top: 10px; }
-  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 14px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .endless { text-align: center; color: var(--muted); font-size: 14px; margin-top: 10px; }
+
+  /* okienka - jak w Connections */
+  .toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: var(--fg); color: var(--bg);
+    padding: 10px 16px; border-radius: 8px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 30; }
   .toast.show { opacity: 1; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center;
+    justify-content: center; z-index: 20; padding: 16px; }
+  .overlay.show { display: flex; }
+  .modal { background: var(--card); color: var(--fg); border-radius: 14px; padding: 24px; max-width: 420px; width: 100%;
+    text-align: center; position: relative; max-height: 92vh; overflow-y: auto; }
+  .modal h2 { margin: 0 0 8px; font-family: Georgia, serif; }
+  .modal .close { position: absolute; top: 8px; right: 10px; border: 0; padding: 6px 10px; font-size: 20px;
+    background: transparent; color: var(--fg); cursor: pointer; }
+  .modal .btns { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .emoji { font-size: 26px; line-height: 1.15; margin: 12px 0; letter-spacing: 2px; }
+  .stats { display: flex; justify-content: center; gap: 18px; margin: 14px 0; }
+  .stats div { display: flex; flex-direction: column; } .stats b { font-size: 26px; } .stats span { font-size: 12px; color: var(--muted); }
+  .dist { text-align: left; margin: 8px 0 4px; font-size: 13px; }
+  .dist .r { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+  .dist .l { width: 14px; text-align: right; font-weight: 600; }
+  .dist .bar { background: var(--muted); color: #fff; padding: 2px 6px; border-radius: 3px; min-width: 22px; text-align: right; font-weight: 600; }
+  .dist .bar.cur { background: var(--ok); }
+  .countdown { color: var(--muted); margin: 10px 0 16px; }
+  .subh { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 14px; }
+  .arch { max-height: 60vh; overflow-y: auto; text-align: left; margin: 8px -6px 0; }
+  .arch a { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: 8px; color: var(--fg); text-decoration: none; }
+  .arch a:hover, .arch a.cur { background: color-mix(in srgb, var(--fg) 8%, transparent); }
+  .arch .d { color: var(--muted); font-size: 13px; }
+  .arch .st { font-size: 15px; white-space: nowrap; }
+  .help { text-align: left; font-size: 15px; line-height: 1.5; }
+  .help .sw { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; margin-right: 4px; }
   .hidden { display: none !important; }
 </style>
 </head>
 <body>
-<header class="top">
-  <a class="home" href="../" data-i18n="home">← Touhou Games</a>
-  <button id="langBtn" title="Język / Language">EN</button>
-  <button id="themeBtn" title="Motyw">🌙</button>
-</header>
+<div class="topbar">
+  <a href="../" id="back">←<span class="bk"> Touhou Games</span></a>
+  <div class="tools">
+    <a id="discordBtn" href="#" target="_blank" rel="noopener" aria-label="Discord" title="Discord">
+      <svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18 18 0 0 0-5.6 0L8.6 3a19.5 19.5 0 0 0-4.9 1.4C.6 9 0 13.6.3 18.1a19.8 19.8 0 0 0 6 3l1.3-2.1c-.7-.3-1.4-.6-2-1l.5-.4a14 14 0 0 0 11.8 0l.5.4-2 1 1.3 2.1a19.7 19.7 0 0 0 6-3c.5-5.2-.8-9.7-3.4-13.7ZM8.5 15.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z"/></svg>
+    </a>
+    <button id="archiveBtn" aria-label="Archive">📅</button>
+    <button id="helpBtn" aria-label="Help">?</button>
+    <button id="statsBtn" aria-label="Stats">📊</button>
+    <button id="langBtn">EN</button>
+    <button id="themeBtn" aria-label="Theme">🌙</button>
+  </div>
+</div>
 
 <main>
-  <h1>Guess the Spell</h1>
-  <p class="sub" data-i18n="subtitle"></p>
+  <h1>Guess the <span>Spell</span></h1>
+  <p class="sub" id="sub"></p>
+  <div class="topcd" id="topcd"></div>
+  <div class="banner" id="banner"></div>
 
   <div class="seg" id="modeSeg">
     <button data-mode="daily" data-i18n="daily"></button>
@@ -101,35 +164,37 @@
 
   <div class="guessbox" id="guessBox">
     <input id="input" autocomplete="off" spellcheck="false">
-    <button id="skipBtn" data-i18n="skip"></button>
+    <button class="pill" id="skipBtn" data-i18n="skip"></button>
     <ul class="sugg hidden" id="sugg"></ul>
   </div>
 
   <ul class="guesses" id="guesses"></ul>
 
   <div class="result hidden" id="result">
-    <h2 id="resTitle"></h2>
     <div class="answer" id="resName"></div>
     <div class="jp" id="resJp"></div>
     <div class="src" id="resSrc"></div>
     <div class="actions">
-      <button id="shareBtn" data-i18n="share"></button>
-      <button id="nextBtn" data-i18n="next"></button>
+      <button class="pill primary" id="resultsBtn" data-i18n="results"></button>
+      <button class="pill primary" id="nextBtn" data-i18n="next"></button>
     </div>
-    <div class="stats" id="countdown"></div>
   </div>
-  <div class="stats" id="stats"></div>
+  <div class="endless" id="endlessStats"></div>
 </main>
+
 <div class="toast" id="toast"></div>
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 
 <script src="common.js"></script>
 <script>
 (() => {
-  // ---------- konfiguracja ----------
-  const MAX_GUESSES = 5;
-  const ZOOMS = [8, 5, 3.2, 2, 1.35];          // przybliżenie przed 1., 2., ... 5. próbą
-  const LAUNCH_DAY = Date.UTC(2026, 10, 28);    // dzień #1 trybu codziennego (UTC), miesiące od 0
+  // ── LINK DO DISCORDA (ten sam co na stronie głównej)
+  const DISCORD_URL = "https://discord.gg/REPLACE";
+  // ── dzień #1 trybu codziennego (UTC, miesiące od 0)
+  const EPOCH = Date.UTC(2026, 10, 28);
   const DAY_MS = 86400000;
+  const MAX_GUESSES = 5;
+  const ZOOMS = [8, 5, 3.2, 2, 1.35];   // przybliżenie przed 1., 2., ... 5. próbą
 
   const { GAMES, hashStr } = GTS;
   const DIFFS = {
@@ -138,77 +203,118 @@
     hard:    { tier: 3, gray: true,  flip: false },
     lunatic: { tier: 4, gray: true,  flip: true  },
   };
+  const diffName = d => d[0].toUpperCase() + d.slice(1);
 
+  // ───── teksty PL/EN
   const T = {
     pl: {
-      home: "← Touhou Games", subtitle: "Rozpoznaj spellcard. Każda pomyłka oddala obrazek.",
-      daily: "Codzienny", endless: "Nieskończony", skip: "Pomiń",
+      sub: n => `Spellcard #${n} · zgadnij w 5 próbach`, subEndless: "Tryb nieskończony · zgaduj ile chcesz",
+      daily: "Codzienny", endless: "Nieskończony", skip: "Pomiń", results: "Wyniki", next: "Następny",
       placeholder: "Wpisz nazwę spellcarda lub postać…",
       note_easy: "Gry klasyczne (6–9)", note_normal: "Wszystkie gry główne",
       note_hard: "Gry główne + fotograficzne · skala szarości",
       note_lunatic: "Wszystko + bijatyki · skala szarości i odbicie lustrzane",
       game: "Gra", character: "Postać", skipped: "(pominięto)",
-      win: "Brawo!", lose: "Nie tym razem", share: "Udostępnij", next: "Następny",
-      copied: "Skopiowano wynik!", nextIn: "Następny spellcard za", streak: "Seria", best: "Rekord",
-      empty: "Brak spellcardów dla tego poziomu.", tries: "Próba",
+      win: ["Niesamowite!", "Świetnie!", "Dobrze!", "Nieźle!", "Uff!"], lose: "Następnym razem się uda!",
+      next_in: "Następny spellcard za", copy: "Kopiuj wynik", copied: "Skopiowano do schowka!",
+      played: "Rozegrane", winPct: "Wygrane %", streak: "Seria", maxStreak: "Najdł. seria", best: "Rekord",
+      stats: "Statystyki", dist: "Rozkład prób", endlessH: "Nieskończony",
+      archive: "Archiwum", today: "Dzisiaj", backToday: "Wróć do dzisiejszego",
+      archiveNote: "Gra w archiwum nie wpływa na statystyki ani serię.", archiveOf: "Spellcard z archiwum",
+      months: ["sty","lut","mar","kwi","maj","cze","lip","sie","wrz","paź","lis","gru"],
+      empty: "Brak spellcardów dla tego poziomu.", helpT: "Jak grać", play: "Graj",
+      help: `<p>Rozpoznaj spellcard z Touhou po fragmencie screena. Masz <b>5 prób</b>, a po każdej pomyłce obrazek się oddala.</p>
+        <p>Wpisz nazwę spellcarda albo postaci i wybierz kartę z listy. Możesz też <b>pominąć</b> próbę, żeby zobaczyć więcej.</p>
+        <p>Po złej odpowiedzi zobaczysz, czy trafiłeś <b>grę</b> i <b>postać</b>:
+        <span class="sw" style="background:var(--part)"></span>coś się zgadza · <span class="sw" style="background:var(--bad)"></span>nic się nie zgadza</p>
+        <p><b>Easy</b> – gry 6–9 · <b>Normal</b> – wszystkie główne · <b>Hard</b> – + gry fotograficzne, skala szarości · <b>Lunatic</b> – + bijatyki, skala szarości i odbicie.</p>
+        <p>Każdy poziom ma własny codzienny spellcard. Nowy codziennie o 00:00 UTC (w Polsce o 1:00, latem o 2:00).</p>`,
     },
     en: {
-      home: "← Touhou Games", subtitle: "Guess the spell card. Every miss zooms the image out.",
-      daily: "Daily", endless: "Endless", skip: "Skip",
+      sub: n => `Spell card #${n} · guess it in 5 tries`, subEndless: "Endless mode · play as long as you like",
+      daily: "Daily", endless: "Endless", skip: "Skip", results: "View results", next: "Next",
       placeholder: "Type a spell card name or character…",
       note_easy: "Classic games (6–9)", note_normal: "All mainline games",
       note_hard: "Mainline + photo games · grayscale",
       note_lunatic: "Everything + fighting games · grayscale and mirrored",
       game: "Game", character: "Character", skipped: "(skipped)",
-      win: "Well done!", lose: "Not this time", share: "Share", next: "Next",
-      copied: "Result copied!", nextIn: "Next spell card in", streak: "Streak", best: "Best",
-      empty: "No spell cards for this difficulty.", tries: "Try",
+      win: ["Incredible!", "Great!", "Nice!", "Solid!", "Phew!"], lose: "Next time!",
+      next_in: "Next spell card in", copy: "Share result", copied: "Copied to clipboard!",
+      played: "Played", winPct: "Win %", streak: "Streak", maxStreak: "Max streak", best: "Best",
+      stats: "Statistics", dist: "Guess distribution", endlessH: "Endless",
+      archive: "Archive", today: "Today", backToday: "Back to today's",
+      archiveNote: "Archive games don't affect your stats or streak.", archiveOf: "Archive spell card",
+      months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+      empty: "No spell cards for this difficulty.", helpT: "How to play", play: "Play",
+      help: `<p>Recognise a Touhou spell card from a piece of a screenshot. You have <b>5 tries</b> and every miss zooms the image out.</p>
+        <p>Type a spell card or character name and pick a card from the list. You can also <b>skip</b> a try to see more.</p>
+        <p>After a wrong guess you'll see whether the <b>game</b> and <b>character</b> match:
+        <span class="sw" style="background:var(--part)"></span>something matches · <span class="sw" style="background:var(--bad)"></span>nothing matches</p>
+        <p><b>Easy</b> – games 6–9 · <b>Normal</b> – all mainline · <b>Hard</b> – + photo games, grayscale · <b>Lunatic</b> – + fighting games, grayscale and mirrored.</p>
+        <p>Each difficulty has its own daily spell card. A new one every day at 00:00 UTC.</p>`,
     },
   };
 
-  // ---------- localStorage (z zabezpieczeniem) ----------
+  // ───── bezpieczny localStorage
   const store = {
-    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
   };
 
-  // język i motyw są wspólne dla całej strony (klucze tmrLang / tmrTheme), tryb i poziom - tylko tej gry
+  // ── USTAWIENIA WSPÓLNE Z HUBEM
+  const THEME_KEY = "tmrTheme", THEME_DARK = "dark", THEME_LIGHT = "light";
+  const LANG_KEY = "tmrLang";
   const raw = {
     get(k) { try { return localStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch {} },
   };
-  const savedLang = raw.get("tmrLang"), savedTheme = raw.get("tmrTheme");
-  const settings = Object.assign(
-    { mode: "daily", diff: "normal" },
-    store.get("gts-settings", {}),
-    {
-      lang: savedLang === "pl" || savedLang === "en" ? savedLang : ((navigator.language || "pl").startsWith("pl") ? "pl" : "en"),
-      theme: savedTheme === "dark" || savedTheme === "light" ? savedTheme : null,
-    }
-  );
-  const saveSettings = () => {
-    store.set("gts-settings", { mode: settings.mode, diff: settings.diff });
-    raw.set("tmrLang", settings.lang);
-    if (settings.theme) raw.set("tmrTheme", settings.theme);
-  };
-  const t = k => T[settings.lang][k] ?? k;
+  const readTheme = () => { const v = raw.get(THEME_KEY);
+    return v == null ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+                     : (String(v).replace(/"/g, "") === THEME_DARK ? "dark" : "light"); };
+  const readLang = () => { const v = String(raw.get(LANG_KEY) || navigator.language || "pl").replace(/"/g, "").toLowerCase();
+    return v.startsWith("en") ? "en" : "pl"; };
+  let lang = readLang(), theme = readTheme();
+  addEventListener("storage", e => {
+    if (e.key === THEME_KEY) { theme = readTheme(); render(); }
+    if (e.key === LANG_KEY) { lang = readLang(); render(); }
+  });
+  const t = () => T[lang];
 
-  // ---------- losowość deterministyczna ----------
+  // tryb i poziom - tylko tej gry
+  const prefs = Object.assign({ mode: "daily", diff: "normal" }, store.get("gts-settings", {}));
+  const savePrefs = () => store.set("gts-settings", prefs);
+
+  // ───── dni: dzisiejszy albo z archiwum (?d=numer)
+  const dayNumber = (ms = Date.now()) => Math.max(1, Math.floor((ms - EPOCH) / DAY_MS) + 1);
+  const dateOfDay = n => { const d = new Date(EPOCH + (n - 1) * DAY_MS); return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()); };
+  const fmtDate = n => { const d = dateOfDay(n); return `${d.getDate()} ${t().months[d.getMonth()]} ${d.getFullYear()}`; };
+  let TODAY = dayNumber();
+  let N = TODAY;
+  {
+    const q = new URLSearchParams(location.search);
+    const r = parseInt(q.get("d"), 10);
+    if (r >= 1 && r <= TODAY) { N = r; prefs.mode = "daily"; }
+    if (DIFFS[q.get("diff")]) prefs.diff = q.get("diff");
+  }
+  const isDaily = () => prefs.mode === "daily";
+  const isArchive = () => isDaily() && N !== TODAY;
+  function syncUrl() {
+    const q = new URLSearchParams();
+    if (isArchive()) { q.set("d", N); q.set("diff", prefs.diff); }
+    const s = q.toString();
+    history.replaceState(null, "", location.pathname + (s ? "?" + s : ""));
+  }
+
+  // ───── losowość deterministyczna
   function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let x = Math.imul(seed ^ seed >>> 15, 1 | seed); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
   function shuffled(arr, seed) { const a = arr.slice(), r = rng(seed); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
-  const dayIndex = () => Math.max(0, Math.floor((Date.now() - LAUNCH_DAY) / DAY_MS));
-
-  // ---------- dane ----------
+  // ───── dane
   let ALL = [];
   const norm = s => s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[「」『』"“”'’]/g, "").trim();
   const keyOf = c => norm(c.name) + "|" + norm(c.character);
-
-  function poolFor(diff) {
-    const tier = DIFFS[diff].tier;
-    return ALL.filter(c => GAMES[c.game] && GAMES[c.game][1] <= tier).sort((a, b) => a.id < b.id ? -1 : 1);
-  }
-  // opcje do zgadywania: karty o tej samej nazwie i postaci (np. z różnych gier) łączymy w jedną
+  const poolFor = diff => ALL.filter(c => GAMES[c.game] && GAMES[c.game][1] <= DIFFS[diff].tier).sort((a, b) => a.id < b.id ? -1 : 1);
   function optionsFor(pool) {
     const m = new Map();
     for (const c of pool) {
@@ -218,60 +324,51 @@
     }
     return [...m.values()].sort((a, b) => a.name.localeCompare(b.name));
   }
+  const dailyCard = (pool, diff, n) => { const order = shuffled(pool, hashStr("daily-" + diff)); return order[(n - 1) % order.length]; };
 
-  // ---------- stan rundy ----------
-  let round = null;   // { card, guesses: [key|null], done, won }
-  let options = [], optByKey = new Map();
-
+  // ───── stan
+  let round = null, options = [], optByKey = new Map();
   const $ = id => document.getElementById(id);
   const frame = $("frame"), cv = $("cv"), input = $("input"), sugg = $("sugg");
-
-  function roundKey() {
-    return settings.mode === "daily"
-      ? `gts-daily-${settings.diff}-${dayIndex()}`
-      : `gts-endless-round-${settings.diff}`;
-  }
-  const endlessStatsKey = () => `gts-endless-${settings.diff}`;
+  const dailyKey = (diff, n) => `gts-daily-${diff}-${n}`;
+  const roundKey = () => isDaily() ? dailyKey(prefs.diff, N) : `gts-endless-round-${prefs.diff}`;
+  const statsKey = () => `gts-stats-${prefs.diff}`;
+  const endlessKey = () => `gts-endless-${prefs.diff}`;
+  const emptyStats = () => ({ played: 0, wins: 0, streak: 0, max: 0, last: 0, lastPlayed: 0, dist: [0, 0, 0, 0, 0, 0] });
 
   function startRound() {
-    const pool = poolFor(settings.diff);
+    closeModal();
+    syncUrl();
+    const pool = poolFor(prefs.diff);
     options = optionsFor(pool);
     optByKey = new Map(options.map(o => [o.key, o]));
     if (!pool.length) { round = null; render(); return; }
 
     const saved = store.get(roundKey(), null);
     let card = saved && pool.find(c => c.id === saved.id);
-
-    if (!card && settings.mode === "daily") {
-      const order = shuffled(pool, hashStr("daily-" + settings.diff));
-      card = order[dayIndex() % order.length];
-    }
+    if (!card && isDaily()) card = dailyCard(pool, prefs.diff, N);
     if (!card) {
-      const st = store.get(endlessStatsKey(), { streak: 0, best: 0, seen: [] });
+      const st = store.get(endlessKey(), { streak: 0, best: 0, seen: [] });
       let fresh = pool.filter(c => !st.seen.includes(c.id));
-      if (!fresh.length) { st.seen = []; fresh = pool; store.set(endlessStatsKey(), st); }
+      if (!fresh.length) { st.seen = []; fresh = pool; store.set(endlessKey(), st); }
       card = fresh[Math.floor(Math.random() * fresh.length)];
     }
     round = (saved && saved.id === card.id)
-      ? { card, guesses: saved.guesses, done: saved.done, won: saved.won }
+      ? { card, guesses: saved.guesses || [], done: !!saved.done, won: !!saved.won }
       : { card, guesses: [], done: false, won: false };
     persist();
     loadImage();
     render();
   }
-
-  function persist() {
-    if (round) store.set(roundKey(), { id: round.card.id, guesses: round.guesses, done: round.done, won: round.won });
-  }
+  const persist = () => { if (round) store.set(roundKey(), { id: round.card.id, guesses: round.guesses, done: round.done, won: round.won }); };
 
   let loadToken = 0;
   function loadImage() {
-    const token = ++loadToken;
+    const token = ++loadToken, c = round.card;
     frame.classList.add("noanim");
     cv.style.visibility = "hidden";
     $("loading").textContent = "…";
     $("loading").classList.remove("hidden");
-    const c = round.card;
     cv.style.transformOrigin = `${c.focus[0] * 100}% ${c.focus[1] * 100}%`;
     applyZoom();
     const im = new Image();
@@ -286,40 +383,30 @@
     im.onerror = () => { if (token === loadToken) $("loading").textContent = "✗ " + c.image; };
     im.src = c.image;
   }
-
   function applyZoom() {
     const z = round.done ? 1 : ZOOMS[Math.min(round.guesses.length, ZOOMS.length - 1)];
     cv.style.transform = `scale(${z})`;
-    const d = DIFFS[settings.diff];
+    const d = DIFFS[prefs.diff];
     frame.classList.toggle("gray", d.gray && !round.done);
     frame.classList.toggle("flip", d.flip && !round.done);
   }
 
-  // ---------- zgadywanie ----------
+  // ───── zgadywanie
   function guessResult(key) {
     if (key === null) return { ok: false, game: false, char: false };
     const o = optByKey.get(key), c = round.card;
-    return {
-      ok: key === keyOf(c),
-      game: o.games.has(c.game),
-      char: norm(o.character) === norm(c.character),
-    };
+    if (!o) return { ok: false, game: false, char: false };
+    return { ok: key === keyOf(c), game: o.games.has(c.game), char: norm(o.character) === norm(c.character) };
   }
+  const squareOf = k => { const r = guessResult(k); return r.ok ? "🟩" : (r.game || r.char) ? "🟨" : "🟥"; };
 
   function submit(key) {
     if (!round || round.done) return;
     if (key !== null && round.guesses.includes(key)) return;
     round.guesses.push(key);
-    const r = guessResult(key);
-    if (r.ok) { round.done = true; round.won = true; }
-    else if (round.guesses.length >= MAX_GUESSES) { round.done = true; }
-    if (round.done && settings.mode === "endless") {
-      const st = store.get(endlessStatsKey(), { streak: 0, best: 0, seen: [] });
-      st.seen.push(round.card.id);
-      st.streak = round.won ? st.streak + 1 : 0;
-      st.best = Math.max(st.best, st.streak);
-      store.set(endlessStatsKey(), st);
-    }
+    if (guessResult(key).ok) { round.done = true; round.won = true; }
+    else if (round.guesses.length >= MAX_GUESSES) round.done = true;
+    if (round.done) finish();
     persist();
     input.value = "";
     hideSugg();
@@ -327,15 +414,36 @@
     render();
   }
 
-  // ---------- podpowiedzi ----------
+  function finish() {
+    if (!isDaily()) {
+      const st = store.get(endlessKey(), { streak: 0, best: 0, seen: [] });
+      st.seen.push(round.card.id);
+      st.streak = round.won ? st.streak + 1 : 0;
+      st.best = Math.max(st.best, st.streak);
+      store.set(endlessKey(), st);
+      return;
+    }
+    if (!isArchive()) {
+      const st = Object.assign(emptyStats(), store.get(statsKey(), {}));
+      if (st.lastPlayed !== N) {
+        st.played++; st.lastPlayed = N;
+        if (round.won) {
+          st.wins++; st.streak = st.last === N - 1 ? st.streak + 1 : 1; st.last = N; st.max = Math.max(st.max, st.streak);
+          st.dist[round.guesses.length - 1]++;
+        } else { st.streak = 0; st.dist[5]++; }
+        store.set(statsKey(), st);
+      }
+    }
+    setTimeout(showResults, 1000);
+  }
+
+  // ───── podpowiedzi
   let suggItems = [], suggSel = 0;
   function updateSugg() {
     const q = norm(input.value);
     if (!q || !round || round.done) return hideSugg();
-    suggItems = options.filter(o =>
-      !round.guesses.includes(o.key) &&
-      (norm(o.name).includes(q) || norm(o.character).includes(q) || (o.jp && o.jp.includes(input.value.trim())))
-    ).slice(0, 10);
+    suggItems = options.filter(o => !round.guesses.includes(o.key) &&
+      (norm(o.name).includes(q) || norm(o.character).includes(q) || (o.jp && o.jp.includes(input.value.trim())))).slice(0, 10);
     suggSel = 0;
     if (!suggItems.length) return hideSugg();
     sugg.innerHTML = "";
@@ -359,7 +467,6 @@
     [...sugg.children].forEach((li, i) => li.classList.toggle("sel", i === suggSel));
     sugg.children[suggSel].scrollIntoView({ block: "nearest" });
   }
-
   input.addEventListener("input", updateSugg);
   input.addEventListener("keydown", e => {
     if (e.key === "ArrowDown") { e.preventDefault(); moveSel(1); }
@@ -368,33 +475,32 @@
     else if (e.key === "Escape") hideSugg();
   });
   input.addEventListener("blur", () => setTimeout(hideSugg, 100));
-  $("skipBtn").addEventListener("click", () => submit(null));
+  $("skipBtn").onclick = () => submit(null);
 
-  // ---------- render ----------
-  function squares() {
-    return round.guesses.map(k => { const r = guessResult(k); return r.ok ? "🟩" : (r.game || r.char) ? "🟨" : "🟥"; });
-  }
-
+  // ───── render
   function render() {
-    document.documentElement.lang = settings.lang;
-    document.documentElement.dataset.theme = settings.theme ||
-      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    $("themeBtn").textContent = document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙";
-    $("langBtn").textContent = settings.lang === "pl" ? "EN" : "PL";
-    document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
-    input.placeholder = t("placeholder");
-    document.querySelectorAll("#modeSeg button").forEach(b => b.classList.toggle("active", b.dataset.mode === settings.mode));
-    document.querySelectorAll("#diffSeg button").forEach(b => b.classList.toggle("active", b.dataset.diff === settings.diff));
-    $("diffNote").textContent = t("note_" + settings.diff);
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.body.classList.toggle("dark", theme === "dark");
+    document.documentElement.lang = lang;
+    $("themeBtn").textContent = theme === "dark" ? "☀️" : "🌙";
+    $("langBtn").textContent = lang === "pl" ? "EN" : "PL";
+    $("archiveBtn").title = t().archive;
+    document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t()[el.dataset.i18n]);
+    input.placeholder = t().placeholder;
+    document.querySelectorAll("#modeSeg button").forEach(b => b.classList.toggle("active", b.dataset.mode === prefs.mode));
+    document.querySelectorAll("#diffSeg button").forEach(b => b.classList.toggle("active", b.dataset.diff === prefs.diff));
+    $("diffNote").textContent = t()["note_" + prefs.diff];
+    $("sub").textContent = isDaily() ? t().sub(N) + (isArchive() ? ` · ${fmtDate(N)}` : "") : t().subEndless;
+    $("banner").innerHTML = isArchive() ? `${t().archiveOf} · <a href="?" id="todayLink">${t().backToday}</a>` : "";
+    if (isArchive()) $("todayLink").onclick = e => { e.preventDefault(); N = TODAY; startRound(); };
+    tickTop();
 
     const guessesEl = $("guesses"), pips = $("pips");
     guessesEl.innerHTML = ""; pips.innerHTML = "";
-
     if (!round) {
-      frame.classList.add("hidden");
-      $("guessBox").classList.add("hidden");
-      $("result").classList.add("hidden");
-      $("stats").textContent = ALL.length ? t("empty") : "";
+      ["frame", "guessBox", "result"].forEach(id => $(id).classList.add("hidden"));
+      $("endlessStats").textContent = ALL.length ? t().empty : "";
       return;
     }
     frame.classList.remove("hidden");
@@ -402,99 +508,181 @@
     for (let i = 0; i < MAX_GUESSES; i++) {
       const p = document.createElement("div");
       p.className = "pip";
-      if (i < round.guesses.length) {
-        const r = guessResult(round.guesses[i]);
-        p.classList.add(r.ok ? "ok" : (r.game || r.char) ? "part" : "bad");
-      }
+      if (i < round.guesses.length) { const r = guessResult(round.guesses[i]); p.classList.add(r.ok ? "ok" : (r.game || r.char) ? "part" : "bad"); }
       pips.appendChild(p);
     }
-
     round.guesses.forEach(k => {
       const li = document.createElement("li");
       const name = document.createElement("span");
       name.className = "gname";
-      if (k === null) { name.textContent = t("skipped"); li.appendChild(name); }
+      li.appendChild(name);
+      if (k === null) name.textContent = t().skipped;
       else {
         const o = optByKey.get(k), r = guessResult(k);
         name.textContent = o ? o.name : k;
-        li.appendChild(name);
         if (r.ok) li.classList.add("win");
-        else {
-          for (const [label, yes] of [[t("game"), r.game], [t("character"), r.char]]) {
-            const chip = document.createElement("span");
-            chip.className = "chip " + (yes ? "y" : "n");
-            chip.textContent = (yes ? "✓ " : "✗ ") + label;
-            li.appendChild(chip);
-          }
+        else for (const [label, yes] of [[t().game, r.game], [t().character, r.char]]) {
+          const chip = document.createElement("span");
+          chip.className = "chip " + (yes ? "y" : "n");
+          chip.textContent = (yes ? "✓ " : "✗ ") + label;
+          li.appendChild(chip);
         }
       }
       guessesEl.appendChild(li);
     });
 
     $("guessBox").classList.toggle("hidden", round.done);
-    const res = $("result");
-    res.classList.toggle("hidden", !round.done);
+    $("result").classList.toggle("hidden", !round.done);
     if (round.done) {
       const c = round.card;
-      $("resTitle").textContent = round.won ? t("win") : t("lose");
       $("resName").textContent = c.name;
       $("resJp").textContent = c.jp || "";
       $("resSrc").textContent = `${c.character} · ${GAMES[c.game] ? GAMES[c.game][0] : c.game}`;
-      $("shareBtn").classList.toggle("hidden", settings.mode !== "daily");
-      $("nextBtn").classList.toggle("hidden", settings.mode !== "endless");
+      $("resultsBtn").classList.toggle("hidden", !isDaily());
+      $("nextBtn").classList.toggle("hidden", isDaily());
     }
-
-    if (settings.mode === "endless") {
-      const st = store.get(endlessStatsKey(), { streak: 0, best: 0 });
-      $("stats").textContent = `${t("streak")}: ${st.streak} · ${t("best")}: ${st.best}`;
-    } else {
-      $("stats").textContent = "";
-    }
-    tickCountdown();
+    if (!isDaily()) {
+      const st = store.get(endlessKey(), { streak: 0, best: 0 });
+      $("endlessStats").textContent = `${t().streak}: ${st.streak} · ${t().best}: ${st.best}`;
+    } else $("endlessStats").textContent = "";
   }
 
-  function tickCountdown() {
-    const el = $("countdown");
-    if (!round || !round.done || settings.mode !== "daily") { el.textContent = ""; return; }
-    const next = LAUNCH_DAY + (dayIndex() + 1) * DAY_MS;
-    let s = Math.max(0, Math.floor((next - Date.now()) / 1000));
-    if (s === 0) { startRound(); return; }
-    const hh = String(Math.floor(s / 3600)).padStart(2, "0");
-    const mm = String(Math.floor(s % 3600 / 60)).padStart(2, "0");
-    const ss = String(s % 60).padStart(2, "0");
-    el.textContent = `${t("nextIn")} ${hh}:${mm}:${ss}`;
+  function countdown() {
+    const s = Math.max(0, Math.floor((DAY_MS - (Date.now() - EPOCH) % DAY_MS) / 1000));
+    return [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(x => String(x).padStart(2, "0")).join(":");
   }
-  setInterval(tickCountdown, 1000);
+  function tickTop() {
+    $("topcd").innerHTML = isDaily() ? `${t().next_in} <b>${countdown()}</b>` : "";
+    const el = $("cd"); if (el) el.textContent = countdown();
+  }
+  setInterval(() => {
+    tickTop();
+    const now = dayNumber();
+    if (now !== TODAY) {           // północ UTC przy otwartej karcie
+      const wasToday = N === TODAY;
+      TODAY = now;
+      if (isDaily() && wasToday) { N = TODAY; startRound(); }
+    }
+  }, 1000);
 
-  // ---------- przyciski ----------
-  $("shareBtn").addEventListener("click", async () => {
-    const sq = squares();
-    while (sq.length < MAX_GUESSES && !round.won) sq.push("⬛");
-    const diffName = settings.diff[0].toUpperCase() + settings.diff.slice(1);
-    const text = `Guess the Spell #${dayIndex() + 1} · ${diffName} · ${round.won ? round.guesses.length : "X"}/${MAX_GUESSES}\n${sq.join("")}\n${location.href.split("?")[0].split("#")[0]}`;
-    try { await navigator.clipboard.writeText(text); toast(t("copied")); }
-    catch { prompt("", text); }
+  // ───── okienka
+  function openModal(html) {
+    $("modal").innerHTML = `<button class="close" aria-label="Close">×</button>` + html;
+    $("modal").querySelector(".close").onclick = closeModal;
+    $("overlay").classList.add("show");
+  }
+  function closeModal() { $("overlay").classList.remove("show"); }
+  $("overlay").onclick = e => { if (e.target.id === "overlay") closeModal(); };
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+  function statsHtml(highlight) {
+    const st = Object.assign(emptyStats(), store.get(statsKey(), {}));
+    const maxD = Math.max(1, ...st.dist);
+    const rows = st.dist.map((v, i) => `<div class="r"><span class="l">${i < 5 ? i + 1 : "X"}</span>
+      <span class="bar${highlight === i ? " cur" : ""}" style="width:${Math.max(8, v / maxD * 100)}%">${v}</span></div>`).join("");
+    return `<div class="stats">
+      <div><b>${st.played}</b><span>${t().played}</span></div>
+      <div><b>${st.played ? Math.round(st.wins / st.played * 100) : 0}</b><span>${t().winPct}</span></div>
+      <div><b>${st.streak}</b><span>${t().streak}</span></div>
+      <div><b>${st.max}</b><span>${t().maxStreak}</span></div></div>
+      <div class="subh">${t().dist}</div><div class="dist">${rows}</div>`;
+  }
+  function endlessHtml() {
+    const st = store.get(endlessKey(), { streak: 0, best: 0 });
+    return `<div class="subh">${t().endlessH}</div><div class="stats">
+      <div><b>${st.streak}</b><span>${t().streak}</span></div><div><b>${st.best}</b><span>${t().best}</span></div></div>`;
+  }
+
+  function shareText() {
+    const sq = round.guesses.map(squareOf);
+    if (!round.won) while (sq.length < MAX_GUESSES) sq.push("⬛");
+    return `Guess the Spell #${N} · ${diffName(prefs.diff)} · ${round.won ? round.guesses.length : "X"}/${MAX_GUESSES}\n${sq.join("")}\n${location.origin + location.pathname}`;
+  }
+
+  function showResults() {
+    if (!round || !round.done || !isDaily()) return;
+    const c = round.card;
+    const title = round.won ? t().win[Math.min(round.guesses.length, 5) - 1] : t().lose;
+    const sq = round.guesses.map(squareOf).join("");
+    openModal(`<h2>${title}</h2><div>Guess the Spell #${N} · ${diffName(prefs.diff)}</div>
+      <div class="emoji">${sq}</div>
+      <div class="answer"></div><div class="jp"></div><div class="src"></div>
+      ${isArchive() ? `<div class="countdown">${t().archiveNote}</div>`
+                    : `${statsHtml(round.won ? round.guesses.length - 1 : 5)}<div class="countdown">${t().next_in} <b id="cd">${countdown()}</b></div>`}
+      <div class="btns"><button class="pill primary" id="shareBtn">${t().copy}</button>
+      <button class="pill" id="archBtn2">${t().archive}</button></div>`);
+    // nazwy wstawiane jako tekst
+    const m = $("modal");
+    m.querySelector(".answer").textContent = c.name;
+    m.querySelector(".jp").textContent = c.jp || "";
+    m.querySelector(".src").textContent = `${c.character} · ${GAMES[c.game] ? GAMES[c.game][0] : c.game}`;
+    $("archBtn2").onclick = showArchive;
+    $("shareBtn").onclick = async () => {
+      const text = shareText();
+      try { await navigator.clipboard.writeText(text); toast(t().copied); } catch { prompt("", text); }
+    };
+  }
+
+  function showArchive() {
+    const pool = poolFor(prefs.diff);
+    let rows = "";
+    for (let n = TODAY; n >= 1; n--) {
+      const st = store.get(dailyKey(prefs.diff, n), null);
+      const icon = !st ? "" : st.done ? (st.won ? `✅ ${st.guesses.length}/${MAX_GUESSES}` : "❌")
+                 : (st.guesses && st.guesses.length ? "▶️" : "");
+      const cur = isDaily() && n === N ? "cur" : "";
+      rows += `<a href="?d=${n}&diff=${prefs.diff}" data-n="${n}" class="${cur}">
+        <span><b>#${n}</b> <span class="d">· ${n === TODAY ? t().today : fmtDate(n)}</span></span>
+        <span class="st">${icon}</span></a>`;
+    }
+    openModal(`<h2>${t().archive} · ${diffName(prefs.diff)}</h2><div class="countdown" style="margin:0">${t().archiveNote}</div>
+      <div class="arch">${pool.length ? rows : t().empty}</div>`);
+    $("modal").querySelectorAll(".arch a").forEach(a => a.onclick = e => {
+      e.preventDefault();
+      N = +a.dataset.n; prefs.mode = "daily"; savePrefs(); startRound();
+    });
+  }
+
+  function showStats() {
+    openModal(`<h2>${t().stats}</h2><div>${diffName(prefs.diff)}</div>${statsHtml()}${endlessHtml()}
+      <div class="countdown">${t().next_in} <b id="cd">${countdown()}</b></div>`);
+  }
+  function showHelp() {
+    openModal(`<h2>${t().helpT}</h2><div class="help">${t().help}</div><button class="pill primary" id="playBtn">${t().play}</button>`);
+    $("playBtn").onclick = closeModal;
+  }
+
+  function toast(msg) {
+    const el = $("toast"); el.textContent = msg; el.classList.add("show");
+    clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("show"), 1600);
+  }
+
+  // ───── przyciski
+  $("discordBtn").href = DISCORD_URL;
+  $("archiveBtn").onclick = showArchive;
+  $("statsBtn").onclick = showStats;
+  $("helpBtn").onclick = showHelp;
+  $("resultsBtn").onclick = showResults;
+  $("nextBtn").onclick = () => { store.del(roundKey()); startRound(); };
+  $("langBtn").onclick = () => { lang = lang === "pl" ? "en" : "pl"; raw.set(LANG_KEY, lang); render(); };
+  $("themeBtn").onclick = () => { theme = theme === "dark" ? "light" : "dark"; raw.set(THEME_KEY, theme === "dark" ? THEME_DARK : THEME_LIGHT); render(); };
+  document.querySelectorAll("#modeSeg button").forEach(b => b.onclick = () => {
+    prefs.mode = b.dataset.mode; if (isDaily()) N = TODAY; savePrefs(); startRound();
   });
-  $("nextBtn").addEventListener("click", () => { store.set(roundKey(), null); startRound(); });
-
-  document.querySelectorAll("#modeSeg button").forEach(b => b.addEventListener("click", () => {
-    settings.mode = b.dataset.mode; saveSettings(); startRound();
-  }));
-  document.querySelectorAll("#diffSeg button").forEach(b => b.addEventListener("click", () => {
-    settings.diff = b.dataset.diff; saveSettings(); startRound();
-  }));
-  $("langBtn").addEventListener("click", () => { settings.lang = settings.lang === "pl" ? "en" : "pl"; saveSettings(); render(); });
-  $("themeBtn").addEventListener("click", () => {
-    settings.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; saveSettings(); render();
+  document.querySelectorAll("#diffSeg button").forEach(b => b.onclick = () => {
+    prefs.diff = b.dataset.diff; savePrefs(); startRound();   // w archiwum zostaje ten sam dzień
   });
 
-  function toast(msg) { const el = $("toast"); el.textContent = msg; el.classList.add("show"); setTimeout(() => el.classList.remove("show"), 1600); }
-
-  // ---------- start ----------
+  // ───── start
   render();
   fetch("spellcards.json", { cache: "no-cache" })
     .then(r => r.json())
-    .then(data => { ALL = data.map(c => ({ ...c, id: GTS.cardId(c), focus: c.focus || [0.5, 0.5] })); startRound(); })
+    .then(data => {
+      ALL = data.map(c => ({ ...c, id: GTS.cardId(c), focus: c.focus || [0.5, 0.5] }));
+      startRound();
+      if (!store.get("gts-seen-help", false)) { store.set("gts-seen-help", true); showHelp(); }
+      else if (round && round.done && isDaily() && !isArchive()) setTimeout(showResults, 300);
+    })
     .catch(() => { $("loading").textContent = "spellcards.json ?"; });
 })();
 </script>
