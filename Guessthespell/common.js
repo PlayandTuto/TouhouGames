@@ -8,10 +8,11 @@ window.GTS = (() => {
     GFW: ["Great Fairy Wars", 2], TD: ["Ten Desires", 2], DDC: ["Double Dealing Character", 2],
     LoLK: ["Legacy of Lunatic Kingdom", 2], HSiFS: ["Hidden Star in Four Seasons", 2],
     WBaWC: ["Wily Beast and Weakest Creature", 2], UM: ["Unconnected Marketeers", 2],
-    UDoALG: ["Unfinished Dream of All Living Ghost", 2],
+    UDoALG: ["Unfinished Dream of All Living Ghost", 2], FW: ["Fossilized Wonders", 2] ,
     StB: ["Shoot the Bullet", 3], DS: ["Double Spoiler", 3], ISC: ["Impossible Spell Card", 3], VD: ["Violet Detector", 3],
     IaMP: ["Immaterial and Missing Power", 4], SWR: ["Scarlet Weather Rhapsody", 4], Soku: ["Hisoutensoku", 4],
     HM: ["Hopeless Masquerade", 4], ULiL: ["Urban Legend in Limbo", 4], AoCF: ["Antinomy of Common Flowers", 4],
+    SFW: ["Sunken Fossil World", 4]
   };
 
   // Domyślne miejsca z nazwą spellcarda dla każdej gry: [x, y, szerokość, wysokość] jako ułamki obrazka.
