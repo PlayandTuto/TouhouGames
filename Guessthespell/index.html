@@ -362,9 +362,14 @@
   }
   const persist = () => { if (round) store.set(roundKey(), { id: round.card.id, guesses: round.guesses, done: round.done, won: round.won }); };
 
-  let loadToken = 0;
+  let loadToken = 0, curImage = null;
+  // po zakończeniu rundy (wygrana lub przegrana) pokazujemy obrazek bez cenzury
+  function drawCard() {
+    if (curImage) GTS.renderCard(cv, curImage, round.done ? [] : GTS.masksFor(round.card));
+  }
   function loadImage() {
     const token = ++loadToken, c = round.card;
+    curImage = null;
     frame.classList.add("noanim");
     cv.style.visibility = "hidden";
     $("loading").textContent = "…";
@@ -374,7 +379,8 @@
     const im = new Image();
     im.onload = () => {
       if (token !== loadToken) return;
-      GTS.renderCard(cv, im, GTS.masksFor(c));
+      curImage = im;
+      drawCard();
       frame.style.aspectRatio = `${im.naturalWidth} / ${im.naturalHeight}`;
       cv.style.visibility = "visible";
       $("loading").classList.add("hidden");
@@ -406,7 +412,7 @@
     round.guesses.push(key);
     if (guessResult(key).ok) { round.done = true; round.won = true; }
     else if (round.guesses.length >= MAX_GUESSES) round.done = true;
-    if (round.done) finish();
+    if (round.done) { finish(); drawCard(); }
     persist();
     input.value = "";
     hideSugg();
