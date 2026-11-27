@@ -1,10 +1,9 @@
 [
-  {"name": "Moon Sign \"Moonlight Ray\"", "jp": "月符「ムーンライトレイ」", "character": "Rumia", "game": "EoSD", "image": "img/eosd_rumia.png", "focus": [0.632, 0.398]},
-  {"name": "Ice Sign \"Icicle Fall\"", "jp": "氷符「アイシクルフォール」", "character": "Cirno", "game": "EoSD", "image": "img/eosd_cirno.png", "focus": [0.512, 0.48]},
-  {"name": "Taboo \"Lævateinn\"", "jp": "禁忌「レーヴァテイン」", "character": "Flandre Scarlet", "game": "EoSD", "image": "img/eosd_flandre.png", "focus": [0.446, 0.307]},
-  {"name": "\"Scarlet Gensokyo\"", "jp": "「紅色の幻想郷」", "character": "Remilia Scarlet", "game": "EoSD", "image": "img/eosd_remilia.png", "focus": [0.36, 0.31]},
-  {"name": "\"Resurrection Butterfly\"", "jp": "「反魂蝶」", "character": "Yuyuko Saigyouji", "game": "PCB", "image": "img/pcb_yuyuko.png", "focus": [0.499, 0.302]},
-  {"name": "\"Mountain of Faith\"", "jp": "「マウンテン・オブ・フェイス」", "character": "Kanako Yasaka", "game": "MoF", "image": "img/mof_kanako.png", "focus": [0.404, 0.447]},
-  {"name": "Explosion Sign \"Giga Flare\"", "jp": "爆符「ギガフレア」", "character": "Utsuho Reiuji", "game": "SA", "image": "img/sa_utsuho.png", "focus": [0.5, 0.433]},
-  {"name": "Oni Sign \"Missing Power\"", "jp": "鬼符「ミッシングパワー」", "character": "Suika Ibuki", "game": "IaMP", "image": "img/iamp_suika.png", "focus": [0.515, 0.454]}
+  {"name":"Moon Sign \"Moonlight Ray\"","jp":"月符「ムーンライトレイ」","character":"Rumia","game":"EoSD","image":"img/Th06SC01.jpg","focus":[0.69,0.73],"mask":[[0.388,0.031,0.523,0.051]]},
+  {"name":"Night Sign \"Night Bird\"","jp":"夜符「ナイトバード」","character":"Rumia","game":"EoSD","image":"img/Th06SC02.jpg","focus":[0.549,0.143],"mask":[[0.458,0.02,0.451,0.069]]},
+  {"name":"Darkness Sign \"Demarcation\"","jp":"闇符「ディマーケイション」","character":"Rumia","game":"EoSD","image":"img/Th06SC03.jpg","focus":[0.604,0.873],"mask":[[0.331,0.018,0.581,0.071]]},
+  {"name":"Ice Sign \"Icicle Fall\"","jp":"氷符「アイシクルフォール」","character":"Cirno","game":"EoSD","image":"img/Th06SC04.jpg","focus":[0.411,0.254],"mask":[[0.341,0.029,0.568,0.049]]},
+  {"name":"Hail Sign \"Hailstorm\"","jp":"雹符「ヘイルストーム」","character":"Cirno","game":"EoSD","image":"img/Th06SC05.jpg","focus":[0.763,0.333],"mask":[[0.427,0.029,0.482,0.058]]},
+  {"name":"Freeze Sign \"Perfect Freeze\"","jp":"凍符「パーフェクトフリーズ」","character":"Cirno","game":"EoSD","image":"img/Th06SC06.jpg","focus":[0.146,0.623],"mask":[[0.302,0.036,0.599,0.051]]},
+  {"name":"Snow Sign \"Diamond Blizzard\"","jp":"雪符「ダイアモンドブリザード」","character":"Cirno","game":"EoSD","image":"img/Th06SC07.jpg","focus":[0.497,0.188],"mask":[[0.263,0.029,0.638,0.049]]}
 ]
