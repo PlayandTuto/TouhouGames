@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guess the Spell · Edytor</title>
+<style>
+  :root { --bg: #15131a; --fg: #ece8f3; --muted: #9b95a7; --card: #211e28; --line: #39333f; --accent: #ff5b70; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg); font-size: 14px; }
+  button, input, select, textarea { font: inherit; color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 5px 9px; }
+  button { cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .wrap { display: grid; grid-template-columns: 260px 1fr 300px; gap: 14px; padding: 14px; height: 100vh; }
+  .col { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+  h2 { margin: 0 0 4px; font-size: 1rem; }
+  .list { flex: 1; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; }
+  .list div { padding: 6px 9px; cursor: pointer; border-bottom: 1px solid var(--line); }
+  .list div.sel { background: var(--line); }
+  .list small { color: var(--muted); display: block; }
+  .stage { position: relative; align-self: start; max-width: 100%; }
+  .stage canvas { display: block; max-width: 100%; max-height: calc(100vh - 90px); cursor: crosshair; border-radius: 6px; }
+  label { display: flex; flex-direction: column; gap: 3px; color: var(--muted); }
+  label input, label select { color: var(--fg); }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .hint { color: var(--muted); font-size: 12px; line-height: 1.45; }
+  .zoomprev { width: 100%; aspect-ratio: 6/7; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; background: #000; }
+  .zoomprev canvas { width: 100%; height: 100%; display: block; }
+  textarea { width: 100%; height: 90px; font-family: ui-monospace, monospace; font-size: 12px; }
+  .chk { flex-direction: row; align-items: center; gap: 6px; color: var(--fg); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="col">
+    <h2>Karty <span id="count" class="hint"></span></h2>
+    <input id="filter" placeholder="Szukaj…">
+    <div class="list" id="list"></div>
+    <div class="row">
+      <button id="newBtn">+ Nowa</button>
+      <button id="delBtn">Usuń</button>
+    </div>
+    <div class="row">
+      <button class="primary" id="dlBtn">Pobierz spellcards.json</button>
+      <button id="reloadBtn" title="Odrzuć zmiany i wczytaj plik z serwera">Wczytaj z serwera</button>
+    </div>
+    <div class="hint">Zmiany zapisują się w przeglądarce na bieżąco. Gdy skończysz, pobierz plik i podmień go w repo.</div>
+  </div>
+
+  <div class="col">
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="showMosaic"> Pokaż mozaikę</label>
+      <span class="hint">Klik = punkt zoomu · przeciągnięcie = nowa maska · prawy klik na masce = usuń ją</span>
+    </div>
+    <div class="stage"><canvas id="cv"></canvas></div>
+  </div>
+
+  <div class="col" style="overflow-y:auto">
+    <label>Obrazek (ścieżka lub URL)<input id="fImage" placeholder="img/nazwa.png"></label>
+    <label>Lub wybierz plik z dysku (podgląd; potem wrzuć go do img/)<input type="file" id="fFile" accept="image/*"></label>
+    <label>Nazwa (EN)<input id="fName"></label>
+    <label>Nazwa (JP)<input id="fJp"></label>
+    <label>Postać<input id="fChar" list="charList"></label>
+    <datalist id="charList"></datalist>
+    <label>Gra<select id="fGame"></select></label>
+    <label class="chk"><input type="checkbox" id="fOwnMask"> Własna maska dla tej karty</label>
+    <div class="row">
+      <button id="clearMask">Wyczyść maski</button>
+      <button id="asDefault" title="Kod do wklejenia w GAME_MASKS w common.js">Jako domyślna dla gry</button>
+    </div>
+    <h2 style="margin-top:6px">Pierwszy kadr (8×)</h2>
+    <div class="zoomprev"><canvas id="zcv"></canvas></div>
+    <h2>Wpis JSON</h2>
+    <textarea id="out" readonly></textarea>
+  </div>
+</div>
+
+<script src="common.js"></script>
+<script>
+(() => {
+  const { GAMES, GAME_MASKS, masksFor, renderCard } = GTS;
+  const LS = "gts-editor-cards";
+  const $ = id => document.getElementById(id);
+  const cv = $("cv"), ctx = cv.getContext("2d"), zcv = $("zcv");
+
+  let cards = [], cur = -1, image = null, localURLs = {};
+
+  for (const [k, [name]] of Object.entries(GAMES)) {
+    const o = document.createElement("option"); o.value = k; o.textContent = `${k} · ${name}`; $("fGame").appendChild(o);
+  }
+
+  const save = () => { try { localStorage.setItem(LS, JSON.stringify(cards)); } catch {} };
+  async function loadServer() {
+    const r = await fetch("spellcards.json", { cache: "no-cache" });
+    cards = await r.json(); save(); cur = cards.length ? 0 : -1; refreshAll();
+  }
+  try { const s = localStorage.getItem(LS); if (s) cards = JSON.parse(s); } catch {}
+  if (cards.length) { cur = 0; refreshAll(); } else loadServer();
+
+  function refreshAll() { renderList(); loadCard(); }
+
+  function renderList() {
+    const q = $("filter").value.toLowerCase();
+    $("list").innerHTML = "";
+    $("count").textContent = `(${cards.length})`;
+    cards.forEach((c, i) => {
+      if (q && !`${c.name} ${c.character} ${c.game}`.toLowerCase().includes(q)) return;
+      const d = document.createElement("div");
+      if (i === cur) d.className = "sel";
+      d.textContent = c.name || "(bez nazwy)";
+      const s = document.createElement("small"); s.textContent = `${c.character || "?"} · ${c.game}`; d.appendChild(s);
+      d.onclick = () => { cur = i; refreshAll(); };
+      $("list").appendChild(d);
+    });
+    const chars = [...new Set(cards.map(c => c.character).filter(Boolean))].sort();
+    $("charList").innerHTML = chars.map(c => `<option value="${c.replace(/"/g, "&quot;")}">`).join("");
+  }
+
+  function card() { return cards[cur]; }
+
+  function loadCard() {
+    const c = card();
+    const fields = ["fImage", "fName", "fJp", "fChar", "fGame", "fOwnMask"];
+    fields.forEach(f => $(f).disabled = !c);
+    if (!c) { ctx.clearRect(0, 0, cv.width, cv.height); $("out").value = ""; return; }
+    $("fImage").value = c.image || ""; $("fName").value = c.name || ""; $("fJp").value = c.jp || "";
+    $("fChar").value = c.character || ""; $("fGame").value = c.game || "EoSD";
+    $("fOwnMask").checked = Array.isArray(c.mask);
+    loadImage();
+  }
+
+  function loadImage() {
+    const c = card(); if (!c) return;
+    const im = new Image();
+    im.onload = () => { if (card() === c) { image = im; draw(); } };
+    im.onerror = () => { image = null; cv.width = 400; cv.height = 120; ctx.fillStyle = "#c44"; ctx.font = "16px sans-serif"; ctx.fillText("Nie można wczytać: " + c.image, 10, 60); updateOut(); };
+    im.src = localURLs[c.image] || c.image;
+  }
+
+  function draw() {
+    const c = card(); if (!c || !image) return;
+    const masks = masksFor(c);
+    if ($("showMosaic").checked) renderCard(cv, image, masks);
+    else { cv.width = image.naturalWidth; cv.height = image.naturalHeight; ctx.drawImage(image, 0, 0); }
+    const W = cv.width, H = cv.height, lw = Math.max(2, W / 200);
+    ctx.lineWidth = lw;
+    ctx.strokeStyle = Array.isArray(c.mask) ? "#ff4060" : "#ffb020";
+    for (const [x, y, w, h] of masks) ctx.strokeRect(x * W, y * H, w * W, h * H);
+    if (drag) { ctx.strokeStyle = "#fff"; ctx.setLineDash([6, 4]); const r = dragRect(); ctx.strokeRect(r[0] * W, r[1] * H, r[2] * W, r[3] * H); ctx.setLineDash([]); }
+    const f = c.focus || [0.5, 0.5], px = f[0] * W, py = f[1] * H, s = W / 25;
+    ctx.strokeStyle = "#00e5ff"; ctx.lineWidth = lw * 1.5;
+    ctx.beginPath(); ctx.moveTo(px - s, py); ctx.lineTo(px + s, py); ctx.moveTo(px, py - s); ctx.lineTo(px, py + s); ctx.stroke();
+    // podgląd pierwszego kadru
+    renderCard(zcv, image, masks);
+    zcv.parentElement.style.aspectRatio = `${image.naturalWidth} / ${image.naturalHeight}`;
+    zcv.style.transformOrigin = `${f[0] * 100}% ${f[1] * 100}%`;
+    zcv.style.transform = "scale(8)";
+    updateOut();
+  }
+
+  function clean(c) {
+    const o = { name: c.name, jp: c.jp || "", character: c.character, game: c.game, image: c.image,
+                focus: (c.focus || [0.5, 0.5]).map(v => +v.toFixed(3)) };
+    if (Array.isArray(c.mask)) o.mask = c.mask.map(r => r.map(v => +v.toFixed(3)));
+    return o;
+  }
+  function updateOut() { const c = card(); $("out").value = c ? JSON.stringify(clean(c), null, 1) : ""; }
+
+  // ---- edycja pól ----
+  const bind = (id, key) => $(id).addEventListener("input", () => { const c = card(); if (!c) return; c[key] = $(id).value.trim(); save(); renderList(); updateOut(); if (key === "image") loadImage(); if (key === "game") draw(); });
+  bind("fImage", "image"); bind("fName", "name"); bind("fJp", "jp"); bind("fChar", "character"); bind("fGame", "game");
+  $("fOwnMask").addEventListener("change", () => {
+    const c = card(); if (!c) return;
+    if ($("fOwnMask").checked) c.mask = masksFor(c).map(r => r.slice()); else delete c.mask;
+    save(); draw();
+  });
+  $("fFile").addEventListener("change", e => {
+    const f = e.target.files[0]; const c = card(); if (!f || !c) return;
+    c.image = "img/" + f.name; localURLs[c.image] = URL.createObjectURL(f);
+    $("fImage").value = c.image; save(); renderList(); loadImage();
+  });
+  $("showMosaic").addEventListener("change", draw);
+  $("filter").addEventListener("input", renderList);
+
+  // ---- mysz: klik = focus, przeciągnięcie = maska ----
+  let drag = null;
+  const pos = e => { const r = cv.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
+  const dragRect = () => { const [a, b] = drag; return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.abs(a[0] - b[0]), Math.abs(a[1] - b[1])]; };
+  cv.addEventListener("mousedown", e => { if (e.button === 0 && card() && image) { const p = pos(e); drag = [p, p]; } });
+  window.addEventListener("mousemove", e => { if (drag) { drag[1] = pos(e); draw(); } });
+  window.addEventListener("mouseup", () => {
+    if (!drag) return;
+    const c = card(), r = dragRect();
+    if (r[2] < 0.01 && r[3] < 0.01) c.focus = drag[0];
+    else {
+      if (!Array.isArray(c.mask)) { c.mask = masksFor(c).map(x => x.slice()); $("fOwnMask").checked = true; }
+      c.mask.push(r);
+    }
+    drag = null; save(); draw();
+  });
+  cv.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    const c = card(); if (!c) return;
+    const [x, y] = pos(e);
+    const masks = masksFor(c);
+    const i = masks.findIndex(([mx, my, mw, mh]) => x >= mx && x <= mx + mw && y >= my && y <= my + mh);
+    if (i < 0) return;
+    if (!Array.isArray(c.mask)) { c.mask = masks.map(r => r.slice()); $("fOwnMask").checked = true; }
+    c.mask.splice(i, 1); save(); draw();
+  });
+
+  // ---- przyciski ----
+  $("clearMask").onclick = () => { const c = card(); if (!c) return; c.mask = []; $("fOwnMask").checked = true; save(); draw(); };
+  $("asDefault").onclick = async () => {
+    const c = card(); if (!c) return;
+    const line = `    ${c.game}: ${JSON.stringify(masksFor(c).map(r => r.map(v => +v.toFixed(3))))},`;
+    try { await navigator.clipboard.writeText(line); alert("Skopiowano. Wklej do GAME_MASKS w common.js:\n\n" + line); }
+    catch { prompt("Wklej do GAME_MASKS w common.js:", line); }
+  };
+  $("newBtn").onclick = () => {
+    const prev = card();
+    cards.push({ name: "", jp: "", character: "", game: prev ? prev.game : "EoSD", image: "img/", focus: [0.5, 0.5] });
+    cur = cards.length - 1; save(); refreshAll(); $("fName").focus();
+  };
+  $("delBtn").onclick = () => {
+    const c = card(); if (!c || !confirm(`Usunąć „${c.name || "(bez nazwy)"}”?`)) return;
+    cards.splice(cur, 1); cur = Math.min(cur, cards.length - 1); save(); refreshAll();
+  };
+  $("reloadBtn").onclick = () => { if (confirm("Odrzucić zmiany z edytora i wczytać spellcards.json z serwera?")) loadServer(); };
+  $("dlBtn").onclick = () => {
+    const bad = cards.filter(c => !c.name || !c.character || !GAMES[c.game]);
+    if (bad.length && !confirm(`${bad.length} kart(y) bez nazwy/postaci/gry. Pobrać mimo to?`)) return;
+    const text = "[\n" + cards.map(c => "  " + JSON.stringify(clean(c))).join(",\n") + "\n]\n";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+    a.download = "spellcards.json"; a.click();
+  };
+})();
+</script>
+</body>
+</html>
