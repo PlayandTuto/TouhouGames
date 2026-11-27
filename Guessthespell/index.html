@@ -172,11 +172,25 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
   };
 
+  // język i motyw są wspólne dla całej strony (klucze tmrLang / tmrTheme), tryb i poziom - tylko tej gry
+  const raw = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+  const savedLang = raw.get("tmrLang"), savedTheme = raw.get("tmrTheme");
   const settings = Object.assign(
-    { mode: "daily", diff: "normal", lang: (navigator.language || "pl").startsWith("pl") ? "pl" : "en", theme: null },
-    store.get("gts-settings", {})
+    { mode: "daily", diff: "normal" },
+    store.get("gts-settings", {}),
+    {
+      lang: savedLang === "pl" || savedLang === "en" ? savedLang : ((navigator.language || "pl").startsWith("pl") ? "pl" : "en"),
+      theme: savedTheme === "dark" || savedTheme === "light" ? savedTheme : null,
+    }
   );
-  const saveSettings = () => store.set("gts-settings", settings);
+  const saveSettings = () => {
+    store.set("gts-settings", { mode: settings.mode, diff: settings.diff });
+    raw.set("tmrLang", settings.lang);
+    if (settings.theme) raw.set("tmrTheme", settings.theme);
+  };
   const t = k => T[settings.lang][k] ?? k;
 
   // ---------- losowość deterministyczna ----------
