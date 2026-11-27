@@ -1,0 +1,10 @@
+[
+  {"name": "Moon Sign \"Moonlight Ray\"", "jp": "月符「ムーンライトレイ」", "character": "Rumia", "game": "EoSD", "image": "img/eosd_rumia.png", "focus": [0.632, 0.398]},
+  {"name": "Ice Sign \"Icicle Fall\"", "jp": "氷符「アイシクルフォール」", "character": "Cirno", "game": "EoSD", "image": "img/eosd_cirno.png", "focus": [0.512, 0.48]},
+  {"name": "Taboo \"Lævateinn\"", "jp": "禁忌「レーヴァテイン」", "character": "Flandre Scarlet", "game": "EoSD", "image": "img/eosd_flandre.png", "focus": [0.446, 0.307]},
+  {"name": "\"Scarlet Gensokyo\"", "jp": "「紅色の幻想郷」", "character": "Remilia Scarlet", "game": "EoSD", "image": "img/eosd_remilia.png", "focus": [0.36, 0.31]},
+  {"name": "\"Resurrection Butterfly\"", "jp": "「反魂蝶」", "character": "Yuyuko Saigyouji", "game": "PCB", "image": "img/pcb_yuyuko.png", "focus": [0.499, 0.302]},
+  {"name": "\"Mountain of Faith\"", "jp": "「マウンテン・オブ・フェイス」", "character": "Kanako Yasaka", "game": "MoF", "image": "img/mof_kanako.png", "focus": [0.404, 0.447]},
+  {"name": "Explosion Sign \"Giga Flare\"", "jp": "爆符「ギガフレア」", "character": "Utsuho Reiuji", "game": "SA", "image": "img/sa_utsuho.png", "focus": [0.5, 0.433]},
+  {"name": "Oni Sign \"Missing Power\"", "jp": "鬼符「ミッシングパワー」", "character": "Suika Ibuki", "game": "IaMP", "image": "img/iamp_suika.png", "focus": [0.515, 0.454]}
+]
