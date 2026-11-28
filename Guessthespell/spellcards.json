@@ -55,15 +55,15 @@
   {"name":"Fire Water Wood Metal Earth Sign \"Philosopher's Stone\"","jp":"火水木金土符「賢者の石」","character":"Patchouli Knowledge","game":"EoSD","image":"img/Th06SC54.jpg","focus":[0.279,0.913],"mask":[[0.372,0.022,0.539,0.058]]},
   {"name":"Taboo \"Cranberry Trap\"","jp":"禁忌「クランベリートラップ」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC55.jpg","focus":[0.482,0.821],"mask":[[0.299,0.027,0.604,0.056]]},
   {"name":"Taboo \"Lævateinn\"","jp":"禁忌「レーヴァテイン」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC56.jpg","focus":[0.492,0.194],"mask":[[0.419,0.031,0.495,0.056]]},
-  {"name":"Taboo \"Four of a Kind\"","jp":"禁忌「フォーオブアカインド」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC57.jpg","focus":[0.227,0.754]},
+  {"name":"Taboo \"Four of a Kind\"","jp":"禁忌「フォーオブアカインド」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC57.jpg","focus":[0.227,0.754],"mask":[[0.299,0.029,0.602,0.056]]},
   {"name":"Taboo \"Kagome, Kagome\"","jp":"禁忌「カゴメカゴメ」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC58.jpg","focus":[0.607,0.569],"mask":[[0.461,0.029,0.44,0.058]]},
-  {"name":"Taboo \"Maze of Love\"","jp":"禁忌「恋の迷路」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC59.jpg","focus":[0.305,0.551]},
+  {"name":"Taboo \"Maze of Love\"","jp":"禁忌「恋の迷路」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC59.jpg","focus":[0.305,0.551],"mask":[[0.544,0.036,0.365,0.049]]},
   {"name":"Forbidden Barrage \"Starbow Break\"","jp":"禁弾「スターボウブレイク」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC60.jpg","focus":[0.378,0.692],"mask":[[0.339,0.031,0.573,0.049]]},
   {"name":"Forbidden Barrage \"Catadioptric\"","jp":"禁弾「カタディオプトリック」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC61.jpg","focus":[0.534,0.723],"mask":[[0.297,0.033,0.612,0.049]]},
   {"name":"Forbidden Barrage \"Clock that Ticks Away the Past\"","jp":"禁弾「過去を刻む時計」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC62.jpg","focus":[0.633,0.638],"mask":[[0.409,0.031,0.508,0.056]]},
-  {"name":"Secret Barrage \"And Then Will There Be None?\"","jp":"秘弾「そして誰もいなくなるか？」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC63.jpg","focus":[0.581,0.886]},
+  {"name":"Secret Barrage \"And Then Will There Be None?\"","jp":"秘弾「そして誰もいなくなるか？」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC63.jpg","focus":[0.581,0.886],"mask":[[0.224,0.029,0.669,0.056]]},
   {"name":"Q.E.D. \"Ripples of 495 Years\"","jp":"QED「495年の波紋」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06SC64.jpg","focus":[0.536,0.221],"mask":[[0.38,0.031,0.523,0.047]]},
-  {"name":"Cursed Barrage \"Fragile Wing\"","jp":"呪弾「フラジャイルウィング」","character":"Flandre Scarlet","game":"EoSD","image":"img/","focus":[0.5,0.5]},
-  {"name":"Cursed Barrage \"Creeping Bloodstain\"","jp":"呪弾「這い寄る血痕」","character":"Flandre Scarlet","game":"EoSD","image":"img/","focus":[0.5,0.5]},
-  {"name":"\"Danmaku Heart\"","jp":"「弾幕の心臓」","character":"Flandre Scarlet","game":"EoSD","image":"img/","focus":[0.5,0.5]}
+  {"name":"Cursed Barrage \"Fragile Wing\"","jp":"呪弾「フラジャイルウィング」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06ncSC132.jpg","focus":[0.482,0.487],"mask":[[0.389,0.03,0.527,0.045]]},
+  {"name":"Cursed Barrage \"Creeping Bloodstain\"","jp":"呪弾「這い寄る血痕」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06ncSC133.jpg","focus":[0.5,0.5],"mask":[[0.527,0.032,0.381,0.043]]},
+  {"name":"\"Danmaku Heart\"","jp":"「弾幕の心臓」","character":"Flandre Scarlet","game":"EoSD","image":"img/Th06ncSC134.jpg","focus":[0.5,0.59],"mask":[[0.626,0.033,0.278,0.038]]}
 ]
